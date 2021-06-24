@@ -7,8 +7,12 @@ class Entry
 	end
 
 	def to_s(io : IO)
-		@senses.each do |sense|
+		io << @headword.upcase
+		io << "\n"
+		@senses.each_with_index(1) do |sense, idx|
+			io << "#{idx}) "
 			io << sense.text
+			io << "\n"
 		end
 	end
 end
