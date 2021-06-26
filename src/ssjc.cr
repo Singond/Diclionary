@@ -19,27 +19,26 @@ class SsjcDictionary
 	def parse_entry(nodeset : XML::NodeSet) : Entry
 		entry = Entry.new ""
 		sense = Sense.new
+		entry.top_sense = sense
+		# top_sense = true
 		expect_headword = true
-		first_sense = true
 		nodeset.each do |node|
 			cls = (node["class"]? || "").split
 			if (expect_headword && cls.includes?("hw") && cls.includes?("bo"))
 				entry.headword = node.content
 				expect_headword = false
-			elsif (cls.includes?("delim") && node.content != "♦ ")
-				if (first_sense)
-					# Sense already instantiated
-					first_sense = false
-				else
+			elsif (cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content)
+				# if (!top_sense)
 					# Start a new sense
-					entry.senses << sense
-					sense = Sense.new
-				end
+					# entry.senses << sense
+					# sense = Sense.new
+				# end
+				sense = Sense.new
+				entry.senses << sense
 			else
 				sense.text += node.content
 			end
 		end
-		entry.senses << sense
 		entry
 	end
 end
