@@ -2,9 +2,11 @@ require "http/client"
 require "xml"
 
 class SsjcDictionary
+	@logger = ::Log.for("xxx")
 	def search(word : String) : Entry
 		params = {"heslo" => word, "hsubstr" => "no", "where" => "hesla"}
 		url = "https://ssjc.ujc.cas.cz/search.php?" + HTTP::Params.encode(params)
+		@logger.info {"Querying '#{url}'"}
 		r = HTTP::Client.get(url)
 		html = XML.parse_html(r.body)
 		e = html.xpath("/html/body/div[1]/p[@class='entryhead']/*")
