@@ -22,7 +22,6 @@ class SsjcDictionary
 		entry = Entry.new ""
 		sense = Sense.new
 		entry.top_sense = sense
-		# top_sense = true
 		expect_headword = true
 		nodeset.each do |node|
 			cls = (node["class"]? || "").split
@@ -30,11 +29,6 @@ class SsjcDictionary
 				entry.headword = node.content
 				expect_headword = false
 			elsif (cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content)
-				# if (!top_sense)
-					# Start a new sense
-					# entry.senses << sense
-					# sense = Sense.new
-				# end
 				sense = Sense.new
 				entry.senses << sense
 			else
