@@ -10,26 +10,41 @@ class Entry
 	def to_s(io : IO)
 		io << @headword.upcase
 		io << "\n"
-		if (top_sense = @top_sense)
-			io << top_sense.text
-			io << "\n"
+		if (sense = @top_sense) && (!sense.empty?)
+			print_sense(io, sense)
 		end
 		@senses.each_with_index(1) do |sense, idx|
 			io << "#{idx}) "
-			io << sense.text
-			io << "\n"
+			print_sense(io, sense)
 		end
+	end
+
+	def print_sense(io : IO, sense : Sense)
+		io << "Definition: "
+		io << sense.definition
+		io << "\n"
+		io << "Detail: "
+		io << sense.text
+		io << "\n"
 	end
 end
 
 class Sense
+	property definition : String
 	property text : String
 
 	def initialize()
+		@definition = ""
 		@text = ""
 	end
 
 	def to_s(io : IO)
+		io << @definition
+		io << "\n"
 		io << @text
+	end
+
+	def empty?
+		@definition.empty? && @text.empty?
 	end
 end

@@ -23,14 +23,23 @@ class SsjcDictionary
 		sense = Sense.new
 		entry.top_sense = sense
 		expect_headword = true
+		expect_definition = false
 		nodeset.each do |node|
 			cls = (node["class"]? || "").split
 			if (expect_headword && cls.includes?("hw") && cls.includes?("bo"))
 				entry.headword = node.content
 				expect_headword = false
+				expect_definition = true
 			elsif (cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content)
 				sense = Sense.new
 				entry.senses << sense
+				expect_definition = true
+			# elsif expect_definition && cls.includes?("it")
+			elsif expect_definition
+				sense.definition += node.content
+				if /.*:\s*/ =~ node.content
+					expect_definition = false
+				end
 			else
 				sense.text += node.content
 			end
