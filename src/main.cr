@@ -1,3 +1,4 @@
+require "colorize"
 require "log"
 require "option_parser"
 
@@ -46,5 +47,6 @@ end
 dd = [SsjcDictionary.new]
 dd.each do |d|
 	entry = d.search(word, format)
+	Colorize.on_tty_only!
 	puts entry
 end

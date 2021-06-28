@@ -27,10 +27,18 @@ class SsjcDictionary
 		entry = TextEntry.new
 		nodeset.each do |node|
 			cls = (node["class"]? || "").split
+			text = node.content
+			fmt = FormattedText::Format.new
 			if cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
-				entry.text += "\n"
+				text = "\n" + text
 			end
-			entry.text += node.content
+			if cls.includes?("it")
+				fmt.bold = true
+			end
+			if cls.includes?("np")
+				fmt.dim = true
+			end
+			entry.text << FormattedText.new(text, fmt)
 		end
 		entry
 	end

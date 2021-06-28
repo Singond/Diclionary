@@ -1,17 +1,28 @@
+require "colorize"
+
 enum Format
 	Text
 	Structured
 end
 
 class TextEntry
-	property text : String
+	property text : Array(FormattedText)
 
 	def initialize()
-		@text = ""
+		@text = [] of FormattedText
 	end
 
 	def to_s(io : IO)
-		io << @text
+		@text.each do |t|
+			o = t.text
+			if t.bold?
+				o = o.colorize.bold
+			end
+			if t.dim?
+				o = o.colorize.dim
+			end
+			io << o
+		end
 	end
 end
 
@@ -63,5 +74,32 @@ class Sense
 
 	def empty?
 		@definition.empty? && @text.empty?
+	end
+end
+
+struct FormattedText
+	def initialize(@text : String, @format : FormattedText::Format)
+	end
+
+	def text
+		@text
+	end
+
+	def bold?
+		@format.bold
+	end
+
+	def dim?
+		@format.dim
+	end
+
+	struct Format
+		property bold : Bool
+		property dim : Bool
+
+		def initialize
+			@bold = false
+			@dim = false
+		end
 	end
 end
