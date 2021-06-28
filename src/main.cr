@@ -7,8 +7,9 @@ require "./ssjc.cr"
 # Log.define_formatter Fmt, "#{source}: #{message}"
 Log.define_formatter Fmt, "#{message}"
 Log.setup("*", :warn, Log::IOBackend.new(formatter: Fmt))
-log_level = Log::Severity::Notice
 
+log_level = Log::Severity::Notice
+format : Format = Format::Text
 word = ""
 
 parser = OptionParser.new do |p|
@@ -18,6 +19,12 @@ parser = OptionParser.new do |p|
 		if lvl >= 1
 			log_level = Log::Severity.from_value(lvl - 1)
 		end
+	end
+	p.on "--plain", "Output in plain text format" do
+		format = Format::Text
+	end
+	p.on "--structured", "Output in structured format" do
+		format = Format::Structured
 	end
 end
 parser.unknown_args do |args|
@@ -38,6 +45,6 @@ end
 
 dd = [SsjcDictionary.new]
 dd.each do |d|
-	entry : Entry = d.search(word)
+	entry = d.search(word, format)
 	puts entry
 end

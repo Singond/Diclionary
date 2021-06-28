@@ -3,7 +3,7 @@ require "xml"
 
 class SsjcDictionary
 	@logger = ::Log.for("xxx")
-	def search(word : String) : Entry
+	def search(word : String, format : Format)
 		params = {"heslo" => word, "hsubstr" => "no", "where" => "hesla"}
 		url = "https://ssjc.ujc.cas.cz/search.php?" + HTTP::Params.encode(params)
 		@logger.info {"Querying '#{url}'"}
@@ -14,12 +14,29 @@ class SsjcDictionary
 		in Bool, Float64, String
 			abort "Unexpected result #{e}", 2
 		in XML::NodeSet
-			return parse_entry(e)
+			case format
+				in Format::Text
+					return parse_entry_plain(e)
+				in Format::Structured
+					return parse_entry_structured(e)
+			end
 		end
 	end
 
-	def parse_entry(nodeset : XML::NodeSet) : Entry
-		entry = Entry.new ""
+	def parse_entry_plain(nodeset : XML::NodeSet) : TextEntry
+		entry = TextEntry.new
+		nodeset.each do |node|
+			cls = (node["class"]? || "").split
+			if cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
+				entry.text += "\n"
+			end
+			entry.text += node.content
+		end
+		entry
+	end
+
+	def parse_entry_structured(nodeset : XML::NodeSet) : StructuredEntry
+		entry = StructuredEntry.new ""
 		sense = Sense.new
 		entry.top_sense = sense
 		expect_headword = true

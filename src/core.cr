@@ -1,4 +1,21 @@
-class Entry
+enum Format
+	Text
+	Structured
+end
+
+class TextEntry
+	property text : String
+
+	def initialize()
+		@text = ""
+	end
+
+	def to_s(io : IO)
+		io << @text
+	end
+end
+
+class StructuredEntry
 	property headword : String
 	property top_sense : Sense?
 	property senses : Array(Sense)
