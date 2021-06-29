@@ -11,6 +11,7 @@ Log.setup("*", :warn, Log::IOBackend.new(formatter: Fmt))
 
 log_level = Log::Severity::Notice
 format : Format = Format::Text
+termwidth = term_width
 word = ""
 
 parser = OptionParser.new do |p|
@@ -48,5 +49,11 @@ dd = [SsjcDictionary.new]
 dd.each do |d|
 	entry = d.search(word, format)
 	Colorize.on_tty_only!
-	puts entry
+	if entry.is_a? TextEntry
+		text = entry.text.join {|e| e.text}
+		# puts text
+		format_text(STDOUT, text, width=termwidth)
+	else
+		puts entry
+	end
 end

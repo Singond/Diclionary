@@ -1,4 +1,5 @@
 require "colorize"
+require "string_scanner"
 
 enum Format
 	Text
@@ -101,5 +102,42 @@ struct FormattedText
 			@bold = false
 			@dim = false
 		end
+	end
+end
+
+def format_text(io : IO, text : String, width = 80)
+	words = [] of String
+	length = 0
+	s = StringScanner.new(text)
+	until s.eos?
+		word = s.scan_until(/\s+/)
+		if !word
+			break
+		end
+		if (length + word.size) > width
+			print_line(io, words)
+			words = [word]
+			length = word.size
+		else
+			words << word
+			length += word.size
+		end
+	end
+	print_line(io, words)
+end
+
+def print_line(io : IO, words : Array)
+	words.each do |w|
+		io << w
+	end
+	io << "\n"
+end
+
+def term_width : Int32
+	w = ENV["COLUMNS"]?
+	if w
+		w = w.to_i
+	else
+		w = 80
 	end
 end
