@@ -105,8 +105,9 @@ struct FormattedText
 	end
 end
 
-def format_text(io : IO, text : String, width = 80)
+def format_text(io : IO, text : String, width = 80, justify = false)
 	words = [] of String
+	jwidth = justify ? width : 0
 	length = 0
 	s = StringScanner.new(text)
 	until s.eos?
@@ -114,21 +115,48 @@ def format_text(io : IO, text : String, width = 80)
 		if !word
 			break
 		end
-		if (length + word.size) > width
-			print_line(io, words)
+		trailing_spaces = s[0]
+		if (length + word.size - trailing_spaces.size) > width
+			print_line(io, words, jwidth)
 			words = [word]
 			length = word.size
 		else
 			words << word
-			length += word.size
+			if trailing_spaces.includes?("\n")
+				print_line(io, words)   # Always ragged left
+				words = [] of String
+				length = 0
+			else
+				length += word.size
+			end
 		end
 	end
 	print_line(io, words)
 end
 
-def print_line(io : IO, words : Array)
-	words.each do |w|
+def print_line(io : IO, words : Array, justify = 0)
+	# Remove trailing whitespace:
+	words[-1] = words[-1].rstrip
+
+	base = 0
+	extra = 0
+	every = 0
+	if justify > 0
+		len = words.reduce(0) {|len, w| len + w.size}
+		if justify > len
+			spaces = justify - len
+			base = spaces // (words.size - 1)
+			extra = spaces % (words.size - 1)
+			every = (words.size - 1) // extra
+		end
+	end
+	words.each_with_index(1) do |w, idx|
 		io << w
+		if (every > 0) && (idx % every == 0) && ((idx / every) <= extra)
+			io << " " * (base + 1)
+		else
+			io << " " * (base)
+		end
 	end
 	io << "\n"
 end

@@ -52,7 +52,7 @@ dd.each do |d|
 	if entry.is_a? TextEntry
 		text = entry.text.join {|e| e.text}
 		# puts text
-		format_text(STDOUT, text, width=termwidth)
+		format_text(STDOUT, text, width=termwidth, justify: true)
 	else
 		puts entry
 	end
