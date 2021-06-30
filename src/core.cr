@@ -113,9 +113,10 @@ def format_text(io : IO, text : String, width = 80, justify = false)
 	until s.eos?
 		word = s.scan_until(/\s+/)
 		if !word
-			break
+			word = s.rest
+			s.terminate
 		end
-		trailing_spaces = s[0]
+		trailing_spaces = s[0]? || ""
 		if (length + word.size - trailing_spaces.size) > width
 			print_line(io, words, jwidth)
 			words = [word]
