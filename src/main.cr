@@ -50,9 +50,7 @@ dd.each do |d|
 	entry = d.search(word, format)
 	Colorize.on_tty_only!
 	if entry.is_a? TextEntry
-		text = entry.text.join {|e| e.text}
-		# puts text
-		format_text(STDOUT, text, width=termwidth, justify: true)
+		format_text(STDOUT, entry.text, width: termwidth, justify: true)
 	else
 		puts entry
 	end

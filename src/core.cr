@@ -15,14 +15,7 @@ class TextEntry
 
 	def to_s(io : IO)
 		@text.each do |t|
-			o = t.text
-			if t.bold?
-				o = o.colorize.bold
-			end
-			if t.dim?
-				o = o.colorize.dim
-			end
-			io << o
+			t.to_s(io)
 		end
 	end
 end
@@ -86,6 +79,10 @@ struct FormattedText
 		@text
 	end
 
+	def text=(text : String)
+		@text = text
+	end
+
 	def bold?
 		@format.bold
 	end
@@ -103,12 +100,58 @@ struct FormattedText
 			@dim = false
 		end
 	end
+
+	def size
+		@text.size
+	end
+
+	def rstrip
+		FormattedText.new(@text.rstrip, @format)
+	end
+
+	def to_s(io : IO)
+		o = @text
+		if bold?
+			o = o.colorize.bold
+		end
+		if dim?
+			o = o.colorize.dim
+		end
+		io << o
+	end
+end
+
+class TextFormatter
+	def initialize(@io : IO, @width : Int32, @justify : Bool)
+		@jwidth = @justify ? @width : 0
+		@length = 0
+		@words = [] of String | FormattedText
+	end
+
+	def append(word : String | FormattedText, word_size, trailing_spaces : String)
+		if (@length + word_size - trailing_spaces.size) > @width
+			print_line(@io, @words, @jwidth)
+			@words = [word] of String | FormattedText
+			@length = word_size
+		else
+			@words << word
+			if trailing_spaces.includes?("\n")
+				print_line(@io, @words)   # Always ragged left
+				@words = [] of String | FormattedText
+				@length = 0
+			else
+				@length += word_size
+			end
+		end
+	end
+
+	def flush
+		print_line(@io, @words)
+	end
 end
 
 def format_text(io : IO, text : String, width = 80, justify = false)
-	words = [] of String
-	jwidth = justify ? width : 0
-	length = 0
+	f = TextFormatter.new(io, width, justify)
 	s = StringScanner.new(text)
 	until s.eos?
 		word = s.scan_until(/\s+/)
@@ -117,25 +160,32 @@ def format_text(io : IO, text : String, width = 80, justify = false)
 			s.terminate
 		end
 		trailing_spaces = s[0]? || ""
-		if (length + word.size - trailing_spaces.size) > width
-			print_line(io, words, jwidth)
-			words = [word]
-			length = word.size
-		else
-			words << word
-			if trailing_spaces.includes?("\n")
-				print_line(io, words)   # Always ragged left
-				words = [] of String
-				length = 0
-			else
-				length += word.size
-			end
-		end
+		f.append(word, word.size, trailing_spaces)
 	end
-	print_line(io, words)
+	f.flush
 end
 
-def print_line(io : IO, words : Array, justify = 0)
+def format_text(io : IO, strings : Array(FormattedText),
+		width = 80, justify = false)
+	f = TextFormatter.new(io, width, justify)
+	strings.each do |fstring|
+		s = StringScanner.new(fstring.text)
+		until s.eos?
+			word = s.scan_until(/\s+/)
+			if !word
+				word = s.rest
+				s.terminate
+			end
+			trailing_spaces = s[0]? || ""
+			fword = fstring.dup
+			fword.text = word
+			f.append(fword, word.size, trailing_spaces)
+		end
+	end
+	f.flush
+end
+
+def print_line(io : IO, words : Array(String|FormattedText), justify = 0)
 	# Remove trailing whitespace:
 	words[-1] = words[-1].rstrip
 
