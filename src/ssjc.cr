@@ -28,7 +28,7 @@ class SsjcDictionary
 		nodeset.each do |node|
 			cls = (node["class"]? || "").split
 			text = node.content
-			fmt = FormattedText::Format.new
+			fmt = FormattedString::Format.new
 			if cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
 				text = "\n" + text
 			end
@@ -38,7 +38,7 @@ class SsjcDictionary
 			if cls.includes?("np")
 				fmt.dim = true
 			end
-			entry.text << FormattedText.new(text, fmt)
+			entry.text << FormattedString.new(text, fmt)
 		end
 		entry
 	end

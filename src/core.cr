@@ -7,10 +7,10 @@ enum Format
 end
 
 class TextEntry
-	property text : Array(FormattedText)
+	property text : Array(FormattedString)
 
 	def initialize()
-		@text = [] of FormattedText
+		@text = [] of FormattedString
 	end
 
 	def to_s(io : IO)
@@ -71,8 +71,8 @@ class Sense
 	end
 end
 
-struct FormattedText
-	def initialize(@text : String, @format : FormattedText::Format)
+struct FormattedString
+	def initialize(@text : String, @format : FormattedString::Format)
 	end
 
 	def text
@@ -106,7 +106,7 @@ struct FormattedText
 	end
 
 	def rstrip
-		FormattedText.new(@text.rstrip, @format)
+		FormattedString.new(@text.rstrip, @format)
 	end
 
 	def to_s(io : IO)
@@ -125,19 +125,19 @@ class TextFormatter
 	def initialize(@io : IO, @width : Int32, @justify : Bool)
 		@jwidth = @justify ? @width : 0
 		@length = 0
-		@words = [] of String | FormattedText
+		@words = [] of String | FormattedString
 	end
 
-	def append(word : String | FormattedText, word_size, trailing_spaces : String)
+	def append(word : String | FormattedString, word_size, trailing_spaces : String)
 		if (@length + word_size - trailing_spaces.size) > @width
 			print_line(@io, @words, @jwidth)
-			@words = [word] of String | FormattedText
+			@words = [word] of String | FormattedString
 			@length = word_size
 		else
 			@words << word
 			if trailing_spaces.includes?("\n")
 				print_line(@io, @words)   # Always ragged left
-				@words = [] of String | FormattedText
+				@words = [] of String | FormattedString
 				@length = 0
 			else
 				@length += word_size
@@ -165,7 +165,7 @@ def format_text(io : IO, text : String, width = 80, justify = false)
 	f.flush
 end
 
-def format_text(io : IO, strings : Array(FormattedText),
+def format_text(io : IO, strings : Array(FormattedString),
 		width = 80, justify = false)
 	f = TextFormatter.new(io, width, justify)
 	strings.each do |fstring|
@@ -185,7 +185,7 @@ def format_text(io : IO, strings : Array(FormattedText),
 	f.flush
 end
 
-def print_line(io : IO, words : Array(String|FormattedText), justify = 0)
+def print_line(io : IO, words : Array(String|FormattedString), justify = 0)
 	# Remove trailing whitespace:
 	words[-1] = words[-1].rstrip
 
