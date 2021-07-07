@@ -194,11 +194,13 @@ def print_line(io : IO, words : Array(String|FormattedString), justify = 0)
 	every = 0
 	if justify > 0
 		len = words.reduce(0) {|len, w| len + w.size}
-		if justify > len
+		if (justify > len) && (words.size > 1)
 			spaces = justify - len
 			base = spaces // (words.size - 1)
 			extra = spaces % (words.size - 1)
-			every = (words.size - 1) // extra
+			if extra != 0
+				every = (words.size - 1) // extra
+			end
 		end
 	end
 	words.each_with_index(1) do |w, idx|
