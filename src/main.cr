@@ -5,9 +5,12 @@ require "option_parser"
 require "./core.cr"
 require "./ssjc.cr"
 
+# Setup logging
 # Log.define_formatter Fmt, "#{source}: #{message}"
 Log.define_formatter Fmt, "#{message}"
-Log.setup("*", :warn, Log::IOBackend.new(formatter: Fmt))
+# Use 'Sync' dispatch mode to ensure correct interleaving with output
+log_backend = Log::IOBackend.new(io: STDERR, formatter: Fmt, dispatcher: :sync)
+Log.setup("*", :warn, log_backend)
 
 log_level = Log::Severity::Notice
 format : Format = Format::Text
@@ -35,7 +38,7 @@ parser.unknown_args do |args|
 	end
 end
 parser.parse
-Log.setup("xxx", log_level, Log::IOBackend.new(formatter: Fmt))
+Log.setup("xxx", log_level, log_backend)
 logger = ::Log.for("xxx")
 
 if word.empty?
@@ -48,6 +51,7 @@ end
 dd = [SsjcDictionary.new]
 dd.each do |d|
 	entry = d.search(word, format)
+	logger.debug {"Displaying entry"}
 	Colorize.on_tty_only!
 	if entry.is_a? TextEntry
 		format_text(STDOUT, entry.text, width: termwidth, justify: true)
