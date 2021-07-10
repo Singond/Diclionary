@@ -15,7 +15,7 @@ Log.setup("*", :warn, log_backend)
 log_level = Log::Severity::Notice
 format : Format = Format::Text
 termwidth = term_width
-word = ""
+words = [] of String
 
 parser = OptionParser.new do |p|
 	p.on "-v", "--verbose", "Increase verbosity" do
@@ -34,28 +34,38 @@ parser = OptionParser.new do |p|
 end
 parser.unknown_args do |args|
 	if args.size > 0
-		word = args[0]
+		words = args
 	end
 end
 parser.parse
 Log.setup("xxx", log_level, log_backend)
 logger = ::Log.for("xxx")
 
-if word.empty?
+if words.empty?
 	logger.error {"No word given"}
 	exit 1
-else
-	logger.debug {"Searching for '#{word}'"}
 end
 
+channel = Channel(TextEntry | StructuredEntry).new
 dd = [SsjcDictionary.new]
 dd.each do |d|
-	entry = d.search(word, format)
-	logger.debug {"Displaying entry"}
+	words.each do |word|
+		spawn do
+			logger.debug {"Searching for '#{word}'."}
+			entry = d.search(word, format)
+			channel.send(entry)
+		end
+	end
 	Colorize.on_tty_only!
-	if entry.is_a? TextEntry
-		format_text(STDOUT, entry.text, width: termwidth, justify: true)
-	else
-		puts entry
+	s = words.size
+	s.times do
+		entry = channel.receive
+		logger.debug {"Displaying entry..."}
+		if entry.is_a? TextEntry
+			format_text(STDOUT, entry.text, width: termwidth, justify: true)
+		else
+			puts entry
+		end
+		puts ""
 	end
 end
