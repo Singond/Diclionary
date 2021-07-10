@@ -7,7 +7,10 @@ class SsjcDictionary
 		params = {"heslo" => word, "hsubstr" => "no", "where" => "hesla"}
 		url = "https://ssjc.ujc.cas.cz/search.php?" + HTTP::Params.encode(params)
 		@logger.info {"Querying '#{url}'"}
+		t_start = Time.monotonic
 		r = HTTP::Client.get(url)
+		t_end = Time.monotonic - t_start
+		@logger.info {"Got response in #{t_end.total_seconds.round(3)} s."}
 		@logger.debug {"Parsing response"}
 		html = XML.parse_html(r.body)
 		e = html.xpath("/html/body/div[1]/p[@class='entryhead']/*")
