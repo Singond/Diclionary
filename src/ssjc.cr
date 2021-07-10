@@ -8,6 +8,7 @@ class SsjcDictionary
 		url = "https://ssjc.ujc.cas.cz/search.php?" + HTTP::Params.encode(params)
 		@logger.info {"Querying '#{url}'"}
 		r = HTTP::Client.get(url)
+		@logger.debug {"Parsing response"}
 		html = XML.parse_html(r.body)
 		e = html.xpath("/html/body/div[1]/p[@class='entryhead']/*")
 		case e
@@ -24,6 +25,7 @@ class SsjcDictionary
 	end
 
 	def parse_entry_plain(nodeset : XML::NodeSet) : TextEntry
+		@logger.debug {"Parsing #{nodeset.size} XML nodes as text entry"}
 		entry = TextEntry.new
 		nodeset.each do |node|
 			cls = (node["class"]? || "").split
@@ -44,6 +46,7 @@ class SsjcDictionary
 	end
 
 	def parse_entry_structured(nodeset : XML::NodeSet) : StructuredEntry
+		@logger.debug {"Parsing #{nodeset.size} XML nodes as structured entry"}
 		entry = StructuredEntry.new ""
 		sense = Sense.new
 		entry.top_sense = sense
