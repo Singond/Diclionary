@@ -71,6 +71,8 @@ class Sense
 	end
 end
 
+alias Entry = TextEntry | StructuredEntry
+
 struct FormattedString
 	def initialize(@text : String, @format : FormattedString::Format)
 	end
@@ -229,7 +231,7 @@ struct Config
 	property format : Format = Format::Text
 end
 
-def print_entry(entry : TextEntry | StructuredEntry)
+def print_entry(entry : Entry)
 	Colorize.on_tty_only!
 	justify = false
 	width = 0
@@ -257,7 +259,7 @@ def run(config : Config)
 		exit 1
 	end
 
-	channel = Channel(TextEntry | StructuredEntry).new
+	channel = Channel(Entry).new
 	dd = [SsjcDictionary.new]
 	dd.each do |d|
 		config.terms.each do |word|
