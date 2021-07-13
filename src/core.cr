@@ -229,6 +229,27 @@ struct Config
 	property format : Format = Format::Text
 end
 
+def print_entry(entry : TextEntry | StructuredEntry)
+	Colorize.on_tty_only!
+	justify = false
+	width = 0
+	if STDOUT.tty? && ENV["TERM"]? != "dumb"
+		justify = true
+		width = term_width
+	end
+
+	case entry
+	when TextEntry
+		if width > 0
+			format_text(STDOUT, entry.text, width: width, justify: justify)
+		else
+			puts entry
+		end
+	else
+		puts entry
+	end
+end
+
 def run(config : Config)
 	logger = ::Log.for("xxx")
 	if config.terms.empty?
@@ -246,16 +267,11 @@ def run(config : Config)
 				channel.send(entry)
 			end
 		end
-		Colorize.on_tty_only!
 		s = config.terms.size
 		s.times do
 			entry = channel.receive
 			logger.debug {"Displaying entry..."}
-			if entry.is_a? TextEntry
-				format_text(STDOUT, entry.text, width: term_width(), justify: true)
-			else
-				puts entry
-			end
+			print_entry(entry)
 			puts ""
 		end
 	end
