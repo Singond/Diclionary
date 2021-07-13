@@ -222,3 +222,41 @@ def term_width : Int32
 		w = 80
 	end
 end
+
+struct Config
+	property log_level = Log::Severity::Notice
+	property terms = [] of String
+	property format : Format = Format::Text
+end
+
+def run(config : Config)
+	logger = ::Log.for("xxx")
+	if config.terms.empty?
+		logger.error {"No word given"}
+		exit 1
+	end
+
+	channel = Channel(TextEntry | StructuredEntry).new
+	dd = [SsjcDictionary.new]
+	dd.each do |d|
+		config.terms.each do |word|
+			spawn do
+				logger.debug {"Searching for '#{word}'."}
+				entry = d.search(word, config.format)
+				channel.send(entry)
+			end
+		end
+		Colorize.on_tty_only!
+		s = config.terms.size
+		s.times do
+			entry = channel.receive
+			logger.debug {"Displaying entry..."}
+			if entry.is_a? TextEntry
+				format_text(STDOUT, entry.text, width: term_width(), justify: true)
+			else
+				puts entry
+			end
+			puts ""
+		end
+	end
+end
