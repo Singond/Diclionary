@@ -117,22 +117,32 @@ def run(config : Config)
 		exit 1
 	end
 
-	channel = Channel(Entry).new
 	dd = [SsjcDictionary.new]
+
+	entries = Hash(String, Entry?).new(nil, config.terms.size)
+	channel = Channel(Nil).new
 	dd.each do |d|
 		config.terms.each do |word|
+			# For now, assume there is only one dictionary
+			entries[word] = nil
 			spawn do
 				logger.debug {"Searching for '#{word}'."}
-				entry = d.search(word, config.format)
-				channel.send(entry)
+				entries[word] = d.search(word, config.format)
+				channel.send(nil)
 			end
 		end
-		s = config.terms.size
-		s.times do
-			entry = channel.receive
-			logger.debug {"Displaying entry..."}
+	end
+	s = config.terms.size
+	s.times do
+		channel.receive
+	end
+	entries.each do |term, entry|
+		if entry
+			logger.debug {"Displaying entry for '#{term}'..."}
 			print_entry(entry)
 			puts ""
+		else
+			logger.notice {"No entry found for '#{term}'"}
 		end
 	end
 end
