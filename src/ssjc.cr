@@ -1,14 +1,19 @@
 require "http/client"
+require "uri"
 require "xml"
 
 class SsjcDictionary
 	@logger = ::Log.for("xxx")
+	URL = URI.new("https", "ssjc.ujc.cas.cz")
+
 	def search(word : String, format : Format)
 		params = {"heslo" => word, "hsubstr" => "no", "where" => "hesla"}
-		url = "https://ssjc.ujc.cas.cz/search.php?" + HTTP::Params.encode(params)
-		@logger.info {"Querying '#{url}'"}
+		url = "/search.php?" + HTTP::Params.encode(params)
+		@logger.info {"Querying '#{URL}#{url}'"}
 		t_start = Time.monotonic
-		r = HTTP::Client.get(url)
+		client = HTTP::Client.new(URL)
+		r = client.get(url)
+		client.close
 		t_end = Time.monotonic - t_start
 		@logger.info {"Got response in #{t_end.total_seconds.round(3)} s."}
 		@logger.debug {"Parsing response"}
