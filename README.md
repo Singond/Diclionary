@@ -13,4 +13,4 @@ dicl <word>
 Supported Dictionaries
 ======================
 This is a list of dictionaries which can be searched with the current version:
-  - Slovník spisovného jazyka českého <ssjc.ujc.cas.cz> (Czech)
+  - Slovník spisovného jazyka českého <https://ssjc.ujc.cas.cz> (Czech)
