@@ -33,7 +33,11 @@ parser.unknown_args do |args|
 		config.terms = args
 	end
 end
-parser.parse
+begin
+	parser.parse
+rescue e : OptionParser::Exception
+	abort(e.message, 2)
+end
 Log.setup("xxx", config.log_level, log_backend)
 logger = ::Log.for("xxx")
 
