@@ -2,6 +2,8 @@ require "colorize"
 
 require "./text.cr"
 
+VERSION = {{ read_file "version" }}
+
 enum Format
 	Text
 	Structured

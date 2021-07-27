@@ -21,6 +21,10 @@ parser = OptionParser.new do |p|
 			config.log_level = Log::Severity.from_value(lvl - 1)
 		end
 	end
+	p.on "--version", "Show version number and exit" do
+		puts VERSION
+		exit(0)
+	end
 	p.on "--plain", "Output in plain text format" do
 		config.format = Format::Text
 	end
