@@ -14,6 +14,7 @@ dicl: $(SRC)
 
 .PHONY: install
 install: $(INST)
+	@echo "Installing $(DESTDIR)$(PREFIX)/bin/dicl"
 	install -d $(DESTDIR)$(PREFIX)/bin/
 	install -m 755 dicl $(DESTDIR)$(PREFIX)/bin/
 
