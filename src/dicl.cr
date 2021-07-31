@@ -5,6 +5,8 @@ require "option_parser"
 require "./core.cr"
 require "./ssjc.cr"
 
+include Diclionary
+
 # Setup logging
 # Log.define_formatter Fmt, "#{source}: #{message}"
 Log.define_formatter Fmt, "#{message}"
