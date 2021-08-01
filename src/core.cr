@@ -127,15 +127,15 @@ module Diclionary
 
 		dd = [SsjcDictionary.new]
 
-		entries = Hash(String, Entry?).new(nil, config.terms.size)
+		results = Hash(String, Array(Entry)).new([] of Entry, config.terms.size)
 		channel = Channel(Nil).new
 		dd.each do |d|
 			config.terms.each do |word|
 				# For now, assume there is only one dictionary
-				entries[word] = nil
+				results[word] = [] of Entry
 				spawn do
 					Log.debug {"Searching for '#{word}'."}
-					entries[word] = d.search(word, config.format)
+					results[word] += d.search(word, config.format)
 					channel.send(nil)
 				end
 			end
@@ -144,11 +144,13 @@ module Diclionary
 		s.times do
 			channel.receive
 		end
-		entries.each do |term, entry|
-			if entry
-				Log.debug {"Displaying entry for '#{term}'..."}
-				print_entry(entry)
-				puts ""
+		results.each do |term, result|
+			if !result.empty?
+				result.each do |entry|
+					Log.debug {"Displaying entry for '#{term}'..."}
+					print_entry(entry)
+					puts ""
+				end
 			else
 				Log.notice {"No entry found for '#{term}'"}
 			end
