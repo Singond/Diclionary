@@ -59,15 +59,16 @@ module Diclionary
 			@words = [] of String | FormattedString
 		end
 
-		def append(word : String | FormattedString, word_size, trailing_spaces : String)
+		def append(word : String | FormattedString,
+				word_size, trailing_spaces : String)
 			if (@length + word_size - trailing_spaces.size) > @width
-				Diclionary.print_line(@io, @words, @jwidth)
+				print_line(@words, @jwidth)
 				@words = [word] of String | FormattedString
 				@length = word_size
 			else
 				@words << word
 				if trailing_spaces.includes?("\n")
-					Diclionary.print_line(@io, @words)   # Always ragged left
+					print_line(@words)   # Always ragged left
 					@words = [] of String | FormattedString
 					@length = 0
 				else
@@ -77,7 +78,41 @@ module Diclionary
 		end
 
 		def flush
-			Diclionary.print_line(@io, @words)
+			print_line(@words)
+		end
+
+		private def print_line(words : Array(String|FormattedString),
+				justify = 0)
+			if words.empty?
+				return
+			end
+
+			# Remove trailing whitespace:
+			words[-1] = words[-1].rstrip
+
+			base = 0
+			extra = 0
+			every = 0
+			if justify > 0
+				len = words.reduce(0) {|len, w| len + w.size}
+				if (justify > len) && (words.size > 1)
+					spaces = justify - len
+					base = spaces // (words.size - 1)
+					extra = spaces % (words.size - 1)
+					if extra != 0
+						every = (words.size - 1) // extra
+					end
+				end
+			end
+			words.each_with_index(1) do |w, idx|
+				@io << w
+				if (every > 0) && (idx % every == 0) && ((idx / every) <= extra)
+					@io << " " * (base + 1)
+				else
+					@io << " " * (base)
+				end
+			end
+			@io << "\n"
 		end
 	end
 
@@ -114,38 +149,5 @@ module Diclionary
 			end
 		end
 		f.flush
-	end
-
-	def print_line(io : IO, words : Array(String|FormattedString), justify = 0)
-		if words.empty?
-			return
-		end
-
-		# Remove trailing whitespace:
-		words[-1] = words[-1].rstrip
-
-		base = 0
-		extra = 0
-		every = 0
-		if justify > 0
-			len = words.reduce(0) {|len, w| len + w.size}
-			if (justify > len) && (words.size > 1)
-				spaces = justify - len
-				base = spaces // (words.size - 1)
-				extra = spaces % (words.size - 1)
-				if extra != 0
-					every = (words.size - 1) // extra
-				end
-			end
-		end
-		words.each_with_index(1) do |w, idx|
-			io << w
-			if (every > 0) && (idx % every == 0) && ((idx / every) <= extra)
-				io << " " * (base + 1)
-			else
-				io << " " * (base)
-			end
-		end
-		io << "\n"
 	end
 end
