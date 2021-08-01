@@ -13,6 +13,13 @@ Log.define_formatter Fmt, "#{source}: #{message}"
 log_backend = Log::IOBackend.new(io: STDERR, formatter: Fmt, dispatcher: :sync)
 Log.setup("*", :warn, log_backend)
 
+def usage(io : IO, parser : OptionParser)
+	io << parser
+	io << "\n\n"
+	io << "See 'man dicl' for more information."
+	io << "\n"
+end
+
 config = Config.new
 parser = OptionParser.new do |p|
 	p.banner = <<-BANNER
@@ -25,7 +32,7 @@ parser = OptionParser.new do |p|
 		exit(0)
 	end
 	p.on "-h", "--help", "Print usage and exit" do
-		puts p
+		usage(STDOUT, p)
 		exit(0)
 	end
 	p.on "-v", "--verbose", "Increase verbosity" do
@@ -54,7 +61,7 @@ rescue e : OptionParser::Exception
 end
 
 if config.terms.empty?
-	STDERR.puts(parser)
+	usage(STDERR, parser)
 	exit(2)
 end
 
