@@ -16,7 +16,7 @@ Log.setup("*", :warn, log_backend)
 config = Config.new
 parser = OptionParser.new do |p|
 	p.banner = <<-BANNER
-		Usage: dicl [OPTIONS] TERM...
+		Usage: dicl [OPTIONS] WORD...
 
 		Options:
 		BANNER

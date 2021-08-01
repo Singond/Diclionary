@@ -4,11 +4,12 @@ dicl \- command-line interface for selected online dictionaries
 .
 .SH SYNOPSIS
 .SY dicl
-.IR TERM...
+.RI [ OPTIONS ]
+.IR WORD ...
 .YS
 .
 .SH DESCRIPTION
-Look up the definition of \fTERM\fR in supported online dictionaries
+Look up the definition of \fIWORD\fR in supported online dictionaries
 and display the results in terminal.
 .
 .SH OPTIONS
@@ -16,5 +17,22 @@ and display the results in terminal.
 .B \-\-version
 Print version and exit.
 .TP
+.B \-h, \-\-help
+Print usage and exit.
+.TP
 .B \-v, \-\-verbose
-Increase verbosity.
+Increase verbosity. This option can be repeated to increase verbosity
+even further.
+.TP
+.B \-\-plain
+Output the results as plain text. When using this option, the text
+content of the result is printed as is, with only minimal formatting
+applied to make it readable in terminal (like breaking long lines).
+.TP
+.B \-\-structured
+Attempt to semantically parse the entry and output the results in a
+structured format. Note that the amount of structured information
+which can be extracted from an entry varies greatly between dictionaries,
+and the results may not reflect the original content correctly.
+Therefore, this option is only supported for some dictionaries,
+others will simply ignore it.
