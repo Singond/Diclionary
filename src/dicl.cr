@@ -53,4 +53,9 @@ rescue e : OptionParser::Exception
 	abort(e.message, 2)
 end
 
+if config.terms.empty?
+	STDERR.puts(parser)
+	exit(2)
+end
+
 run(config)
