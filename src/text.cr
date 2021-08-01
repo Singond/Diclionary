@@ -117,6 +117,10 @@ module Diclionary
 	end
 
 	def print_line(io : IO, words : Array(String|FormattedString), justify = 0)
+		if words.empty?
+			return
+		end
+
 		# Remove trailing whitespace:
 		words[-1] = words[-1].rstrip
 
