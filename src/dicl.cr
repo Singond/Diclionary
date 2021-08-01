@@ -15,16 +15,25 @@ Log.setup("*", :warn, log_backend)
 
 config = Config.new
 parser = OptionParser.new do |p|
+	p.banner = <<-BANNER
+		Usage: dicl [OPTIONS] TERM...
+
+		Options:
+		BANNER
+	p.on "--version", "Show version number and exit" do
+		puts VERSION
+		exit(0)
+	end
+	p.on "-h", "--help", "Print usage and exit" do
+		puts p
+		exit(0)
+	end
 	p.on "-v", "--verbose", "Increase verbosity" do
 		# Decrease logging level, if possible.
 		lvl = config.log_level.value
 		if lvl >= 1
 			config.log_level = Log::Severity.from_value(lvl - 1)
 		end
-	end
-	p.on "--version", "Show version number and exit" do
-		puts VERSION
-		exit(0)
 	end
 	p.on "--plain", "Output in plain text format" do
 		config.format = Format::Text
