@@ -7,6 +7,8 @@ module Diclionary
 
 	VERSION = {{ read_file "version" }}
 
+	Log = ::Log.for("dicl")
+
 	enum Format
 		Text
 		Structured
@@ -89,7 +91,7 @@ module Diclionary
 	end
 
 	struct Config
-		property log_level = Log::Severity::Notice
+		property log_level : ::Log::Severity = ::Log::Severity::Notice
 		property terms = [] of String
 		property format : Format = Format::Text
 	end
@@ -116,9 +118,10 @@ module Diclionary
 	end
 
 	def run(config : Config)
-		logger = ::Log.for("xxx")
+		Log.level = config.log_level
+
 		if config.terms.empty?
-			logger.error {"No word given"}
+			Log.error {"No word given"}
 			exit 1
 		end
 
@@ -131,7 +134,7 @@ module Diclionary
 				# For now, assume there is only one dictionary
 				entries[word] = nil
 				spawn do
-					logger.debug {"Searching for '#{word}'."}
+					Log.debug {"Searching for '#{word}'."}
 					entries[word] = d.search(word, config.format)
 					channel.send(nil)
 				end
@@ -143,11 +146,11 @@ module Diclionary
 		end
 		entries.each do |term, entry|
 			if entry
-				logger.debug {"Displaying entry for '#{term}'..."}
+				Log.debug {"Displaying entry for '#{term}'..."}
 				print_entry(entry)
 				puts ""
 			else
-				logger.notice {"No entry found for '#{term}'"}
+				Log.notice {"No entry found for '#{term}'"}
 			end
 		end
 	end

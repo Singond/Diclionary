@@ -4,20 +4,19 @@ require "xml"
 
 module Diclionary
 	class SsjcDictionary
-		@logger = ::Log.for("xxx")
 		URL = URI.new("https", "ssjc.ujc.cas.cz")
 
 		def search(word : String, format : Format)
 			params = {"heslo" => word, "hsubstr" => "no", "where" => "hesla"}
 			url = "/search.php?" + HTTP::Params.encode(params)
-			@logger.info {"Querying '#{URL}#{url}'"}
+			Log.info {"Querying '#{URL}#{url}'"}
 			t_start = Time.monotonic
 			client = HTTP::Client.new(URL)
 			r = client.get(url)
 			client.close
 			t_end = Time.monotonic - t_start
-			@logger.info {"Got response in #{t_end.total_seconds.round(3)} s."}
-			@logger.debug {"Parsing response"}
+			Log.info {"Got response in #{t_end.total_seconds.round(3)} s."}
+			Log.debug {"Parsing response"}
 			html = XML.parse_html(r.body)
 			e = html.xpath("/html/body/div[1]/p[@class='entryhead']/*")
 			case e
@@ -34,7 +33,7 @@ module Diclionary
 		end
 
 		def parse_entry_plain(nodeset : XML::NodeSet) : TextEntry
-			@logger.debug {"Parsing #{nodeset.size} XML nodes as text entry"}
+			Log.debug {"Parsing #{nodeset.size} XML nodes as text entry"}
 			entry = TextEntry.new
 			nodeset.each do |node|
 				cls = (node["class"]? || "").split
@@ -55,7 +54,7 @@ module Diclionary
 		end
 
 		def parse_entry_structured(nodeset : XML::NodeSet) : StructuredEntry
-			@logger.debug {"Parsing #{nodeset.size} XML nodes as structured entry"}
+			Log.debug {"Parsing #{nodeset.size} XML nodes as structured entry"}
 			entry = StructuredEntry.new ""
 			sense = Sense.new
 			entry.top_sense = sense

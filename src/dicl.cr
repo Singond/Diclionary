@@ -8,8 +8,7 @@ require "./ssjc.cr"
 include Diclionary
 
 # Setup logging
-# Log.define_formatter Fmt, "#{source}: #{message}"
-Log.define_formatter Fmt, "#{message}"
+Log.define_formatter Fmt, "#{source}: #{message}"
 # Use 'Sync' dispatch mode to ensure correct interleaving with output
 log_backend = Log::IOBackend.new(io: STDERR, formatter: Fmt, dispatcher: :sync)
 Log.setup("*", :warn, log_backend)
@@ -44,7 +43,5 @@ begin
 rescue e : OptionParser::Exception
 	abort(e.message, 2)
 end
-Log.setup("xxx", config.log_level, log_backend)
-logger = ::Log.for("xxx")
 
 run(config)
