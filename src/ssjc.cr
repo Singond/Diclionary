@@ -30,7 +30,7 @@ module Diclionary
 					return [] of Entry
 				end
 				case format
-					in Format::Text
+					in Format::PlainText, Format::RichText
 						return [parse_entry_plain(e)] of Entry
 					in Format::Structured
 						return [parse_entry_structured(e)] of Entry

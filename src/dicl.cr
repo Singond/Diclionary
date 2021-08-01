@@ -36,7 +36,7 @@ parser = OptionParser.new do |p|
 		end
 	end
 	p.on "--plain", "Output in plain text format" do
-		config.format = Format::Text
+		config.format = Format::PlainText
 	end
 	p.on "--structured", "Output in structured format" do
 		config.format = Format::Structured

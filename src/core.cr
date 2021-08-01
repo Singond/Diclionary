@@ -10,7 +10,8 @@ module Diclionary
 	Log = ::Log.for("dicl")
 
 	enum Format
-		Text
+		PlainText
+		RichText
 		Structured
 	end
 
@@ -93,10 +94,10 @@ module Diclionary
 	struct Config
 		property log_level : ::Log::Severity = ::Log::Severity::Notice
 		property terms = [] of String
-		property format : Format = Format::Text
+		property format : Format = Format::RichText
 	end
 
-	def print_entry(entry : Entry)
+	def print_entry(entry : Entry, config : Config)
 		Colorize.on_tty_only!
 		justify = false
 		width = 0
@@ -106,13 +107,15 @@ module Diclionary
 		end
 
 		case entry
-		when TextEntry
+		in TextEntry
 			if width > 0
-				format_text(STDOUT, entry.text, width: width, justify: justify)
+				format_text(STDOUT, entry.text, width: width,
+					justify: justify, rich: config.format != Format::PlainText)
 			else
+				# A dumb terminal
 				puts entry
 			end
-		else
+		in StructuredEntry
 			puts entry
 		end
 	end
@@ -148,7 +151,7 @@ module Diclionary
 			if !result.empty?
 				result.each do |entry|
 					Log.debug {"Displaying entry for '#{term}'..."}
-					print_entry(entry)
+					print_entry(entry, config)
 					puts ""
 				end
 			else

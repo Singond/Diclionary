@@ -53,7 +53,7 @@ module Diclionary
 	end
 
 	class TextFormatter
-		def initialize(@io : IO, @width : Int32, @justify : Bool)
+		def initialize(@io : IO, @width : Int32, @justify : Bool, @rich = true)
 			@jwidth = @justify ? @width : 0
 			@length = 0
 			@words = [] of String | FormattedString
@@ -105,7 +105,11 @@ module Diclionary
 				end
 			end
 			words.each_with_index(1) do |w, idx|
-				@io << w
+				if (w.is_a?(FormattedString)) && !@rich
+					@io << w.text
+				else
+					@io << w
+				end
 				if (every > 0) && (idx % every == 0) && ((idx / every) <= extra)
 					@io << " " * (base + 1)
 				else
@@ -117,7 +121,7 @@ module Diclionary
 	end
 
 	def format_text(io : IO, text : String, width = 80, justify = false)
-		f = TextFormatter.new(io, width, justify)
+		f = TextFormatter.new(io, width, justify: justify)
 		s = StringScanner.new(text)
 		until s.eos?
 			word = s.scan_until(/\s+/)
@@ -132,8 +136,8 @@ module Diclionary
 	end
 
 	def format_text(io : IO, strings : Array(FormattedString),
-			width = 80, justify = false)
-		f = TextFormatter.new(io, width, justify)
+			width = 80, justify = false, rich = true)
+		f = TextFormatter.new(io, width, justify: justify, rich: rich)
 		strings.each do |fstring|
 			s = StringScanner.new(fstring.text)
 			until s.eos?
