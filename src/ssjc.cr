@@ -2,8 +2,10 @@ require "http/client"
 require "uri"
 require "xml"
 
-module Diclionary
-	class SsjcDictionary
+module Diclionary::Ujc
+	SSJC = SsjcDictionary.new("ssjc", "Slovník spisovného jazyka českého")
+
+	struct SsjcDictionary < Dictionary
 		URL = URI.new("https", "ssjc.ujc.cas.cz")
 
 		def search(word : String, format : Format) : SearchResult

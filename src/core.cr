@@ -9,6 +9,15 @@ module Diclionary
 
 	Log = ::Log.for("dicl")
 
+	# A connector to a dictionary.
+	abstract struct Dictionary
+		def initialize(@name : String = "", @title : String = "")
+		end
+
+		# Searches *word* in the dictionary and returns the result.
+		abstract def search(word : String, format : Format) : SearchResult
+	end
+
 	enum Format
 		PlainText
 		RichText
@@ -138,7 +147,7 @@ module Diclionary
 			exit 1
 		end
 
-		dd = [SsjcDictionary.new]
+		dd = [Diclionary::Ujc::SSJC]
 
 		allresults = Hash(String, Array(SearchResult)).new(
 			[] of SearchResult, config.terms.size)
