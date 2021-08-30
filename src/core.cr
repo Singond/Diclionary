@@ -80,6 +80,16 @@ module Diclionary
 		end
 	end
 
+	struct SearchResult
+		def initialize(@entries : Array(Entry))
+			# @entries = entries
+		end
+
+		def empty?()
+			@entries.empty?
+		end
+	end
+
 	alias Entry = TextEntry | StructuredEntry
 
 	def term_width : Int32
@@ -130,15 +140,16 @@ module Diclionary
 
 		dd = [SsjcDictionary.new]
 
-		results = Hash(String, Array(Entry)).new([] of Entry, config.terms.size)
+		allresults = Hash(String, Array(SearchResult)).new(
+			[] of SearchResult, config.terms.size)
 		channel = Channel(Nil).new
 		dd.each do |d|
 			config.terms.each do |word|
 				# For now, assume there is only one dictionary
-				results[word] = [] of Entry
+				allresults[word] = [] of SearchResult
 				spawn do
 					Log.debug {"Searching for '#{word}'."}
-					results[word] += d.search(word, config.format)
+					allresults[word] << d.search(word, config.format)
 					channel.send(nil)
 				end
 			end
@@ -147,12 +158,14 @@ module Diclionary
 		s.times do
 			channel.receive
 		end
-		results.each do |term, result|
-			if !result.empty?
-				result.each do |entry|
-					Log.debug {"Displaying entry for '#{term}'..."}
-					print_entry(entry, config)
-					puts ""
+		allresults.each do |term, results|
+			if !results.empty?
+				results.each do |result|
+					result.@entries.each do |entry|
+						Log.debug {"Displaying entry for '#{term}'..."}
+						print_entry(entry, config)
+						puts ""
+					end
 				end
 			else
 				Log.notice {"No entry found for '#{term}'"}

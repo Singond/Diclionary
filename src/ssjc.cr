@@ -6,7 +6,7 @@ module Diclionary
 	class SsjcDictionary
 		URL = URI.new("https", "ssjc.ujc.cas.cz")
 
-		def search(word : String, format : Format) : Array(Entry)
+		def search(word : String, format : Format) : SearchResult
 			params = {"heslo" => word, "hsubstr" => "no", "where" => "hesla"}
 			url = "/search.php?" + HTTP::Params.encode(params)
 			Log.info {"Querying '#{URL}#{url}'"}
@@ -20,22 +20,23 @@ module Diclionary
 			parse_response(XML.parse_html(r.body), format)
 		end
 
-		private def parse_response(html, format : Format) : Array(Entry)
+		private def parse_response(html, format : Format) : SearchResult
 			e = html.xpath("/html/body/div[1]/p[@class='entryhead']/*")
 			case e
 			in Bool, Float64, String
 				abort "Unexpected result #{e}", 2
 			in XML::NodeSet
 				if e.empty?
-					return [] of Entry
+					entries = [] of Entry
 				end
 				case format
 					in Format::PlainText, Format::RichText
-						return [parse_entry_plain(e)] of Entry
+						entries = [parse_entry_plain(e)] of Entry
 					in Format::Structured
-						return [parse_entry_structured(e)] of Entry
+						entries = [parse_entry_structured(e)] of Entry
 				end
 			end
+			SearchResult.new(entries)
 		end
 
 		def parse_entry_plain(nodeset : XML::NodeSet) : TextEntry
