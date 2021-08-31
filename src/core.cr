@@ -24,6 +24,8 @@ module Diclionary
 		Structured
 	end
 
+	alias Entry = TextEntry | StructuredEntry
+
 	class TextEntry
 		property text : Array(FormattedString)
 
@@ -90,8 +92,9 @@ module Diclionary
 	end
 
 	struct SearchResult
+		getter entries : Array(Entry)
+
 		def initialize(@entries : Array(Entry))
-			# @entries = entries
 		end
 
 		def empty?()
@@ -99,7 +102,7 @@ module Diclionary
 		end
 	end
 
-	alias Entry = TextEntry | StructuredEntry
+	alias AllResults = Hash(String, Array(SearchResult))
 
 	def term_width : Int32
 		w = ENV["COLUMNS"]?
@@ -114,6 +117,11 @@ module Diclionary
 		property log_level : ::Log::Severity = ::Log::Severity::Notice
 		property terms = [] of String
 		property format : Format = Format::RichText
+	end
+
+	def init_dictionaries(config : Config) : Array(Dictionary)
+		all = [Diclionary::Ujc::SSJC] of Dictionary
+		all
 	end
 
 	def print_entry(entry : Entry, config : Config)
@@ -139,38 +147,11 @@ module Diclionary
 		end
 	end
 
-	def run(config : Config)
-		Log.level = config.log_level
-
-		if config.terms.empty?
-			Log.error {"No word given"}
-			exit 1
-		end
-
-		dd = [Diclionary::Ujc::SSJC]
-
-		allresults = Hash(String, Array(SearchResult)).new(
-			[] of SearchResult, config.terms.size)
-		channel = Channel(Nil).new
-		dd.each do |d|
-			config.terms.each do |word|
-				# For now, assume there is only one dictionary
-				allresults[word] = [] of SearchResult
-				spawn do
-					Log.debug {"Searching for '#{word}'."}
-					allresults[word] << d.search(word, config.format)
-					channel.send(nil)
-				end
-			end
-		end
-		s = config.terms.size
-		s.times do
-			channel.receive
-		end
+	def print_results(allresults : AllResults, config : Config)
 		allresults.each do |term, results|
 			if !results.empty?
 				results.each do |result|
-					result.@entries.each do |entry|
+					result.entries.each do |entry|
 						Log.debug {"Displaying entry for '#{term}'..."}
 						print_entry(entry, config)
 						puts ""
@@ -180,5 +161,36 @@ module Diclionary
 				Log.notice {"No entry found for '#{term}'"}
 			end
 		end
+	end
+
+	def run(config : Config)
+		Log.level = config.log_level
+
+		if config.terms.empty?
+			Log.error {"No word given"}
+			exit 1
+		end
+
+		dictionaries = init_dictionaries(config)
+
+		results = AllResults.new(
+			[] of SearchResult, config.terms.size)
+		channel = Channel(Nil).new
+		dictionaries.each do |d|
+			config.terms.each do |word|
+				# For now, assume there is only one dictionary
+				results[word] = [] of SearchResult
+				spawn do
+					Log.debug {"Searching for '#{word}'."}
+					results[word] << d.search(word, config.format)
+					channel.send(nil)
+				end
+			end
+		end
+		s = config.terms.size
+		s.times do
+			channel.receive
+		end
+		print_results(results, config)
 	end
 end
