@@ -30,12 +30,14 @@ module Diclionary::Ujc
 			in XML::NodeSet
 				if e.empty?
 					entries = [] of Entry
-				end
-				case format
+				else
+					case format
 					in Format::PlainText, Format::RichText
-						entries = [parse_entry_plain(e)] of Entry
+						entry = parse_entry_plain(e)
 					in Format::Structured
-						entries = [parse_entry_structured(e)] of Entry
+						entry = parse_entry_structured(e)
+					end
+					entries = [entry] of Entry
 				end
 			end
 			SearchResult.new(entries)

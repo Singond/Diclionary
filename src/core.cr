@@ -147,28 +147,28 @@ module Diclionary
 		end
 	end
 
-	def print_results(allresults : AllResults, config : Config)
+	def print_results(allresults : AllResults, config : Config) : Bool
+		empty = true
 		allresults.each do |term, results|
-			if !results.empty?
-				results.each do |result|
-					result.entries.each do |entry|
-						Log.debug {"Displaying entry for '#{term}'..."}
-						print_entry(entry, config)
-						puts ""
-					end
+			results.each do |result|
+				result.entries.each do |entry|
+					Log.debug {"Displaying entry for '#{term}'..."}
+					print_entry(entry, config)
+					puts ""
+					empty = false
 				end
-			else
-				Log.notice {"No entry found for '#{term}'"}
 			end
 		end
+		empty
 	end
 
 	def run(config : Config)
 		Log.level = config.log_level
 
+		# Handled separately in CLI, kept here for non-CLI usage
 		if config.terms.empty?
 			Log.error {"No word given"}
-			exit 1
+			exit 2
 		end
 
 		dictionaries = init_dictionaries(config)
@@ -178,7 +178,6 @@ module Diclionary
 		channel = Channel(Nil).new
 		dictionaries.each do |d|
 			config.terms.each do |word|
-				# For now, assume there is only one dictionary
 				results[word] = [] of SearchResult
 				spawn do
 					Log.debug {"Searching for '#{word}'."}
@@ -191,6 +190,10 @@ module Diclionary
 		s.times do
 			channel.receive
 		end
-		print_results(results, config)
+		empty = print_results(results, config)
+		if empty
+			# No results found
+			exit 1
+		end
 	end
 end
