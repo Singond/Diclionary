@@ -29,11 +29,11 @@ parser = OptionParser.new do |p|
 		BANNER
 	p.on "--version", "Show version number and exit" do
 		puts VERSION
-		exit(0)
+		exit(ExitCode::Success.value)
 	end
 	p.on "-h", "--help", "Print usage and exit" do
 		usage(STDOUT, p)
-		exit(0)
+		exit(ExitCode::Success.value)
 	end
 	p.on "-v", "--verbose", "Increase verbosity" do
 		# Decrease logging level, if possible.
@@ -62,7 +62,8 @@ end
 
 if config.terms.empty?
 	usage(STDERR, parser)
-	exit(2)
+	exit(ExitCode::BadUsage.value)
 end
 
-run(config)
+exit_code = run(config)
+exit exit_code.value

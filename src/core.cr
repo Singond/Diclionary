@@ -9,6 +9,13 @@ module Diclionary
 
 	Log = ::Log.for("dicl")
 
+	enum ExitCode
+		Success = 0
+		NoResult = 1
+		BadUsage = 2
+		Other = 10
+	end
+
 	# A connector to a dictionary.
 	abstract struct Dictionary
 		def initialize(@name : String = "", @title : String = "")
@@ -162,13 +169,13 @@ module Diclionary
 		empty
 	end
 
-	def run(config : Config)
+	def run(config : Config) : ExitCode
 		Log.level = config.log_level
 
 		# Handled separately in CLI, kept here for non-CLI usage
 		if config.terms.empty?
 			Log.error {"No word given"}
-			exit 2
+			return ExitCode::BadUsage
 		end
 
 		dictionaries = init_dictionaries(config)
@@ -193,7 +200,8 @@ module Diclionary
 		empty = print_results(results, config)
 		if empty
 			# No results found
-			exit 1
+			return ExitCode::NoResult
 		end
+		ExitCode::Success
 	end
 end
