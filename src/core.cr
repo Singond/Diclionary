@@ -156,7 +156,11 @@ module Diclionary
 
 	def print_results(allresults : AllResults, config : Config) : Bool
 		empty = true
+		# print_terms = config.terms.size > 1
 		allresults.each do |term, results|
+			# if print_terms
+			# 	STDOUT << "[" << term.colorize.bold << "]\n"
+			# end
 			results.each do |result|
 				result.entries.each do |entry|
 					Log.debug {"Displaying entry for '#{term}'..."}
