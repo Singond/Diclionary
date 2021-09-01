@@ -2,6 +2,8 @@ require "http/client"
 require "uri"
 require "xml"
 
+require "./core.cr"
+
 module Diclionary::Ujc
 	SSJC = SsjcDictionary.new("ssjc", "Slovník spisovného jazyka českého")
 

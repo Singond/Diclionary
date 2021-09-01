@@ -1,9 +1,6 @@
-require "colorize"
-require "log"
 require "option_parser"
 
-require "./core.cr"
-require "./ssjc.cr"
+require "./main.cr"
 
 include Diclionary
 
