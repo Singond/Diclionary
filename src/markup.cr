@@ -26,7 +26,20 @@ module Diclionary::Markup
 	end
 
 	abstract struct Container < Markup
+		@value : Array(Markup)
+
 		def initialize(@value : Array(Markup) = [] of Markup)
+		end
+
+		def initialize(*content : Markup | String)
+			if content.size == 1
+				@value = [to_markup(content[0])] of Markup
+			else
+				@value = [] of Markup
+				content.each do |elem|
+					@value << to_markup(elem)
+				end
+			end
 		end
 
 		def children
@@ -58,25 +71,37 @@ module Diclionary::Markup
 	struct Base < Container
 	end
 
+	private def to_markup(value : Markup | String) : Markup
+		case value
+		in Markup
+			value
+		in String
+			PlainText.new(value)
+		end
+	end
+
 	def markup()
 		Base.new()
 	end
 
-	private def to_markup(*content : Markup | String) : Array(Markup)
-		value = [] of Markup
-		content.each do |elem|
-			case elem
-				in Markup
-				value << elem
-				in String
-				value << PlainText.new(elem)
-			end
+	def markup(*content : Markup | String)
+		if content.size == 1
+			to_markup(content[0])
+		else
+			Base.new(*content)
 		end
-		value
 	end
 
-	def markup(*content : Markup | String)
-		Base.new(to_markup(*content))
+	struct Italic < Container
+		def to_html(io : IO)
+			io << "<i>"
+			super
+			io << "</i>"
+		end
+	end
+
+	def italic(*content : Markup | String)
+		Italic.new(*content)
 	end
 
 	struct Bold < Container
@@ -88,6 +113,6 @@ module Diclionary::Markup
 	end
 
 	def bold(*content : Markup | String)
-		Bold.new(to_markup(*content))
+		Bold.new(*content)
 	end
 end
