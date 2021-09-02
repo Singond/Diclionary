@@ -43,9 +43,17 @@ describe Markup do
 			m.to_html.should eq "line with a <b>bold</b> word inside"
 		end
 	end
-end
+	describe "#bold" do
+		it "is a shorthand for Bold.new" do
+			a = bold("some text")
+			b = Bold.new("some text")
+			a.should eq b
+			c = bold("some text", "consisting of", italic("many"), "parts")
+			d = Bold.new("some text", "consisting of", italic("many"), "parts")
+			c.should eq d
+		end
+	end
 
-describe Markup do
 	it "can be nested" do
 		m = markup("a", markup("b", "c", markup("d"), "e"))
 		m.children[0].should eq markup("a")
@@ -54,5 +62,24 @@ describe Markup do
 		m.children[1].children[1].should eq markup("c")
 		m.children[1].children[2].should eq markup("d")
 		m.children[1].children[3].should eq markup("e")
+	end
+end
+
+describe Bold do
+	it "contains PlainText if created with single String argument" do
+		m = bold("some text")
+		m.should be_a Bold
+		m.children.size.should eq 1
+		m.children[0].should be_a PlainText
+		m.children[0].text.should eq "some text"
+	end
+	it "contains all arguments it was created with" do
+		m = bold("some", italic("text"))
+		m.should be_a Bold
+		m.children.size.should eq 2
+		m.children[0].should be_a PlainText
+		m.children[0].text.should eq "some"
+		m.children[1].should be_a Italic
+		m.children[1].text.should eq "text"
 	end
 end
