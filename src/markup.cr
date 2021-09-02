@@ -92,6 +92,27 @@ module Diclionary::Markup
 		end
 	end
 
+	class MarkupVisitor
+		@open : Proc(Markup, Nil) = ->(m : Markup) {}
+		@close : Proc(Markup, Nil) = ->(m : Markup) {}
+
+		def open(&block : Markup -> Nil)
+			@open = block
+		end
+
+		def close(&block : Markup -> Nil)
+			@close = block
+		end
+
+		def visit(elem : Markup)
+			@open.call(elem)
+			elem.children.each do |e|
+				visit(e)
+			end
+			@close.call(elem)
+		end
+	end
+
 	struct Italic < Container
 		def to_html(io : IO)
 			io << "<i>"

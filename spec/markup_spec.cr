@@ -65,6 +65,65 @@ describe Markup do
 	end
 end
 
+describe MarkupVisitor do
+	describe "#visit" do
+		it "does not fail when not initialized" do
+			m = markup("a", bold("b"), "c")
+			v = MarkupVisitor.new
+			v.visit(m)
+		end
+		it "allows walking the markup tree in proper order" do
+			m = markup("a", bold("b"), "c")
+			v = MarkupVisitor.new
+			arr = [] of Markup
+			v.open do |e|
+				arr << e
+			end
+			v.visit(m)
+			arr.should eq [m, markup("a"), bold("b"), markup("b"), markup("c")]
+		end
+		# it "allows executing custom code on entering and leaving elements" do
+		#
+		# end
+		it "allows extracting the text content" do
+			m = markup("a", bold("b"), "c")
+			v = MarkupVisitor.new
+			str = ""
+			v.open do |e|
+				case e
+				when PlainText
+					str += e.text
+				end
+			end
+			v.visit(m)
+			str.should eq "abc"
+		end
+		it "allows rewriting the tree into another representation" do
+			m = markup("a ", bold("bold and also ", italic("italic")), " text")
+			v = MarkupVisitor.new
+			str = ""
+			v.open do |e|
+				case e
+				when PlainText
+					str += e.text
+				when Bold
+					str += %q(\textbf{)
+				when Italic
+					str += %q(\textit{)
+				end
+			end
+			v.close do |e|
+				case e
+				when Bold, Italic
+					str += '}'
+				end
+			end
+			v.visit(m)
+			str.should eq %q(a \textbf{bold and also \textit{italic}} text)
+		end
+	end
+end
+
 describe Bold do
 	it "contains PlainText if created with single String argument" do
 		m = bold("some text")
