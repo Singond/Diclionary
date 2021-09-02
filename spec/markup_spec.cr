@@ -43,6 +43,13 @@ describe Markup do
 			m.to_html.should eq "line with a <b>bold</b> word inside"
 		end
 	end
+	describe "#to_s" do
+		it "prints the object" do
+			markup("a").to_s.should eq "a"
+			m = markup("a ", bold("bold and also ", italic("italic")), " text")
+			m.to_s.should eq "\\base{a \\bold{bold and also \\italic{italic}} text}"
+		end
+	end
 	describe "#bold" do
 		it "is a shorthand for Bold.new" do
 			a = bold("some text")
@@ -140,5 +147,11 @@ describe Bold do
 		m.children[0].text.should eq "some"
 		m.children[1].should be_a Italic
 		m.children[1].text.should eq "text"
+	end
+	describe "#to_s" do
+		it "prints \\bold(...)" do
+			m = bold("text")
+			m.to_s.should eq "\\bold{text}"
+		end
 	end
 end

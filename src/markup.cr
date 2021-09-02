@@ -23,6 +23,18 @@ module Diclionary::Markup
 				to_html io
 			end
 		end
+
+		def inspect(io : IO)
+			io << '\\'
+			io << self.class.name.split("::").last.downcase
+			if !children.empty?
+				io << "{"
+				children.each do |c|
+					c.to_s(io)
+				end
+				io << "}"
+			end
+		end
 	end
 
 	abstract struct Container < Markup
@@ -64,6 +76,10 @@ module Diclionary::Markup
 		end
 
 		def text(io : IO)
+			io << @text
+		end
+
+		def inspect(io : IO)
 			io << @text
 		end
 	end
