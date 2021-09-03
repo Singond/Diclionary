@@ -63,12 +63,12 @@ describe Markup do
 
 	it "can be nested" do
 		m = markup("a", markup("b", "c", markup("d"), "e"))
-		m.children[0].should eq markup("a")
-		m.children[1].should eq markup("b", "c", markup("d"), "e")
-		m.children[1].children[0].should eq markup("b")
-		m.children[1].children[1].should eq markup("c")
-		m.children[1].children[2].should eq markup("d")
-		m.children[1].children[3].should eq markup("e")
+		m.children[0].should eq PlainText.new("a")
+		m.children[1].should eq Base.new("b", "c", PlainText.new("d"), "e")
+		m.children[1].children[0].should eq PlainText.new("b")
+		m.children[1].children[1].should eq PlainText.new("c")
+		m.children[1].children[2].should eq PlainText.new("d")
+		m.children[1].children[3].should eq PlainText.new("e")
 	end
 end
 
