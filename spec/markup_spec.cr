@@ -70,6 +70,17 @@ describe Markup do
 		m.children[1].children[2].should eq PlainText.new("d")
 		m.children[1].children[3].should eq PlainText.new("e")
 	end
+	it "is enumerable" do
+		markup("x").to_a.should eq [PlainText.new("x")]
+		m = markup(markup("x"), "y")
+		m.to_a.should eq [m, PlainText.new("x"), PlainText.new("y")]
+		m = markup("a", markup("b", "c", markup("d"), "e"))
+		m.to_a.should eq [m,
+			PlainText.new("a"),
+			Base.new(PlainText.new("b"), PlainText.new("c"),
+				PlainText.new("d"), PlainText.new("e")),
+			PlainText.new("b"), PlainText.new("c"), PlainText.new("d"), PlainText.new("e")]
+	end
 end
 
 describe MarkupVisitor do

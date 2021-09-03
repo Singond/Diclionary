@@ -1,5 +1,7 @@
 module Diclionary::Markup
 	abstract struct Markup
+		include Enumerable(Markup)
+
 		def children
 			[] of Markup
 		end
@@ -33,6 +35,13 @@ module Diclionary::Markup
 					c.to_s(io)
 				end
 				io << "}"
+			end
+		end
+
+		def each(&block : Markup ->)
+			block.call(self)
+			children.each do |c|
+				c.each &block
 			end
 		end
 	end
