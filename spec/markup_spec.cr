@@ -60,6 +60,12 @@ describe Markup do
 			c.should eq d
 		end
 	end
+	describe "#to_ansi" do
+		it "prints the text with ANSI escape codes" do
+			m = markup("A text with a ", bold("bold"), " word")
+			m.to_ansi.should eq "A text with a \e[1mbold\e[0m word"
+		end
+	end
 
 	it "can be nested" do
 		m = markup("a", markup("b", "c", markup("d"), "e"))

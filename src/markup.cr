@@ -49,6 +49,41 @@ module Diclionary::Markup
 		def each
 			MarkupIterator.new(self)
 		end
+
+		# Converts the rich text into text with ANSI escape codes
+		# for display in terminal.
+		def to_ansi(io : IO)
+			bold = 0
+			dim = 0
+			mw = MarkupWalker.new
+			mw.open do |e|
+				case e
+				when PlainText
+					c = Colorize.with
+					if bold > 0
+						c = c.bold
+					end
+					c.surround(io) do
+						io << e.text
+					end
+				when Bold
+					bold += 1
+				end
+			end
+			mw.close do |e|
+				case e
+				when Bold
+					bold -= 1
+				end
+			end
+			mw.walk(self)
+		end
+
+		def to_ansi
+			String.build do |io|
+				to_ansi io
+			end
+		end
 	end
 
 	abstract struct Container < Markup
