@@ -216,4 +216,19 @@ describe Bold do
 			m.to_s.should eq "\\bold{text}"
 		end
 	end
+	describe "#to_html" do
+		it "prints <b>...</b>" do
+			m = bold("text")
+			m.to_html.should eq "<b>text</b>"
+		end
+	end
+end
+
+describe Italic do
+	describe "#to_html" do
+		it "prints <i>...</i>" do
+			m = italic("text")
+			m.to_html.should eq "<i>text</i>"
+		end
+	end
 end

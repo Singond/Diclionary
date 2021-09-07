@@ -88,6 +88,7 @@ module Diclionary::Markup
 
 	abstract struct Container < Markup
 		@value : Array(Markup)
+		@@html_tag : String = ""
 
 		def initialize(@value : Array(Markup) = [] of Markup)
 		end
@@ -114,9 +115,12 @@ module Diclionary::Markup
 		end
 
 		def to_html(io : IO)
+			tag = @@html_tag
+			io << "<" << tag << ">" unless tag.empty?
 			@value.reduce "" do |alltext, elem|
 				io << elem.to_html
 			end
+			io << "</" << tag << ">" unless tag.empty?
 		end
 	end
 
@@ -214,11 +218,7 @@ module Diclionary::Markup
 	end
 
 	struct Italic < Container
-		def to_html(io : IO)
-			io << "<i>"
-			super
-			io << "</i>"
-		end
+		@@html_tag = "i"
 	end
 
 	def italic(*content : Markup | String)
@@ -226,11 +226,7 @@ module Diclionary::Markup
 	end
 
 	struct Bold < Container
-		def to_html(io : IO)
-			io << "<b>"
-			super
-			io << "</b>"
-		end
+		@@html_tag = "b"
 	end
 
 	def bold(*content : Markup | String)
