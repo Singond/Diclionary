@@ -122,7 +122,7 @@ module Diclionary::Markup
 		end
 	end
 
-	class MarkupVisitor
+	class MarkupWalker
 		@open : Proc(Markup, Nil) = ->(m : Markup) {}
 		@close : Proc(Markup, Nil) = ->(m : Markup) {}
 
@@ -134,10 +134,10 @@ module Diclionary::Markup
 			@close = block
 		end
 
-		def visit(elem : Markup)
+		def walk(elem : Markup)
 			@open.call(elem)
 			elem.children.each do |e|
-				visit(e)
+				walk(e)
 			end
 			@close.call(elem)
 		end
