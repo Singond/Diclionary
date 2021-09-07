@@ -1,6 +1,7 @@
 module Diclionary::Markup
 	abstract struct Markup
 		include Enumerable(Markup)
+		include Iterable(Markup)
 
 		def children
 			[] of Markup
@@ -38,11 +39,15 @@ module Diclionary::Markup
 			end
 		end
 
-		def each(&block : Markup ->)
-			block.call(self)
-			children.each do |c|
-				c.each &block
+		def each
+			iter = each()
+			while !(elem = iter.next()).is_a? Iterator::Stop
+				yield elem
 			end
+		end
+
+		def each
+			MarkupIterator.new(self)
 		end
 	end
 
@@ -135,6 +140,41 @@ module Diclionary::Markup
 				visit(e)
 			end
 			@close.call(elem)
+		end
+	end
+
+	class MarkupIterator
+		include Iterator(Markup)
+
+		@iters : Deque(Iterator(Markup))
+		@iter : Iterator(Markup)
+
+		def initialize(markup : Markup)
+			@iter = [markup].each
+			@iters = Deque(Iterator(Markup)).new
+			@iters.push @iter
+		end
+
+		def next
+			elem = @iter.next
+			if !elem.is_a?(Iterator::Stop)
+				if !elem.children().empty?
+					# Recurse into children
+					@iter = elem.children.each
+					@iters.push @iter
+				end
+			else
+				# No more leaves in this branch
+				while elem.is_a?(Iterator::Stop) && !@iters.empty?
+					@iters.pop
+					if !@iters.empty?
+						# Move to sibling branch
+						@iter = @iters.last
+						elem = @iter.next
+					end
+				end
+			end
+			elem
 		end
 	end
 
