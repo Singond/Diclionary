@@ -53,12 +53,18 @@ module Diclionary::Markup
 		# Converts the rich text into text with ANSI escape codes
 		# for display in terminal.
 		def to_ansi(io : IO)
+			at_start = true
+			pending_whitespace = ""
+
 			bold = 0
 			dim = 0
 			mw = MarkupWalker.new
 			mw.open do |e|
+				whitespace_written = false
 				case e
 				when PlainText
+					next if e.text.empty?
+					at_start = false
 					c = Colorize.with
 					if bold > 0
 						c = c.bold
@@ -66,6 +72,8 @@ module Diclionary::Markup
 					if dim > 0
 						c = c.dim
 					end
+					io << pending_whitespace
+					whitespace_written = true
 					c.surround(io) do
 						io << e.text
 					end
@@ -73,7 +81,20 @@ module Diclionary::Markup
 					bold += 1
 				when Small
 					dim += 1
+				when Paragraph
+					next if e.text.empty?
+					if pending_whitespace.ends_with? "\n\n"
+						io << pending_whitespace
+						whitespace_written = true
+					elsif pending_whitespace.ends_with? "\n"
+						io << pending_whitespace
+						whitespace_written = true
+						io << "\n"
+					elsif !at_start
+						io << "\n\n"
+					end
 				end
+				pending_whitespace = "" if whitespace_written
 			end
 			mw.close do |e|
 				case e
@@ -81,6 +102,8 @@ module Diclionary::Markup
 					bold -= 1
 				when Small
 					dim -= 1
+				when Paragraph
+					pending_whitespace = "\n\n" unless e.text.empty?
 				end
 			end
 			mw.walk(self)
@@ -246,5 +269,17 @@ module Diclionary::Markup
 
 	def small(*content : Markup | String)
 		Small.new(*content)
+	end
+
+	struct Paragraph < Container
+		@@html_tag = "p"
+		# def text(io : IO)
+		# 	io << "\n\n"
+		# 	super
+		# end
+	end
+
+	def paragraph(*content : Markup | String)
+		Paragraph.new(*content)
 	end
 end

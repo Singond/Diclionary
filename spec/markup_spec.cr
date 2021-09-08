@@ -244,3 +244,37 @@ describe Small do
 		end
 	end
 end
+
+describe Paragraph do
+	describe "#to_html" do
+		it "prints <p>...</p>" do
+			m = paragraph("text")
+			m.to_html.should eq "<p>text</p>"
+		end
+	end
+	describe "#to_ansi" do
+		it "prints paragraphs separated by blank lines" do
+			m = markup(
+				paragraph("This is the first paragraph."),
+				paragraph("Second paragraph follows."),
+				paragraph("This is the third and final paragraph."))
+			m.to_ansi.should eq <<-EXPECTED
+				This is the first paragraph.
+
+				Second paragraph follows.
+
+				This is the third and final paragraph.
+				EXPECTED
+		end
+		it "separates paragraphs from text outside paragraphs" do
+			m = markup(
+				"This text is outside any paragraph.",
+				paragraph("This is inside a paragraph."))
+			m.to_ansi.should eq <<-EXPECTED
+				This text is outside any paragraph.
+
+				This is inside a paragraph.
+				EXPECTED
+		end
+	end
+end
