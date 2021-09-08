@@ -64,6 +64,9 @@ describe Markup do
 		it "prints the text with ANSI escape codes" do
 			m = markup("A text with a ", bold("bold"), " word")
 			m.to_ansi.should eq "A text with a \e[1mbold\e[0m word"
+			markup("A text with a ", bold("bold"), " and ",
+				small("faint"), " word").to_ansi
+				.should eq "A text with a \e[1mbold\e[0m and \e[2mfaint\e[0m word"
 		end
 	end
 
@@ -229,6 +232,15 @@ describe Italic do
 		it "prints <i>...</i>" do
 			m = italic("text")
 			m.to_html.should eq "<i>text</i>"
+		end
+	end
+end
+
+describe Small do
+	describe "#to_html" do
+		it "prints <small>...</small>" do
+			m = small("text")
+			m.to_html.should eq "<small>text</small>"
 		end
 	end
 end

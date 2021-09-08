@@ -63,17 +63,24 @@ module Diclionary::Markup
 					if bold > 0
 						c = c.bold
 					end
+					if dim > 0
+						c = c.dim
+					end
 					c.surround(io) do
 						io << e.text
 					end
 				when Bold
 					bold += 1
+				when Small
+					dim += 1
 				end
 			end
 			mw.close do |e|
 				case e
 				when Bold
 					bold -= 1
+				when Small
+					dim -= 1
 				end
 			end
 			mw.walk(self)
@@ -231,5 +238,13 @@ module Diclionary::Markup
 
 	def bold(*content : Markup | String)
 		Bold.new(*content)
+	end
+
+	struct Small < Container
+		@@html_tag = "small"
+	end
+
+	def small(*content : Markup | String)
+		Small.new(*content)
 	end
 end
