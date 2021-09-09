@@ -66,6 +66,7 @@ module Diclionary::Text
 			pending_whitespace = ""
 
 			bold = 0
+			italic = 0
 			dim = 0
 			mw = MarkupWalker.new
 			mw.open do |e|
@@ -84,10 +85,14 @@ module Diclionary::Text
 					io << pending_whitespace
 					whitespace_written = true
 					c.surround(io) do
+						io << "\e[3m" if italic > 0
 						io << e.text
+						io << "\e[0m" if italic > 0
 					end
 				when Bold
 					bold += 1
+				when Italic
+					italic += 1
 				when Small
 					dim += 1
 				when Paragraph
@@ -109,6 +114,8 @@ module Diclionary::Text
 				case e
 				when Bold
 					bold -= 1
+				when Italic
+					italic -= 1
 				when Small
 					dim -= 1
 				when Paragraph
