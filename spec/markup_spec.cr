@@ -2,7 +2,7 @@ require "spec"
 
 require "../src/markup.cr"
 
-include Diclionary::Markup
+include Diclionary::Text
 
 describe Markup do
 	describe "#markup" do

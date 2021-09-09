@@ -1,4 +1,4 @@
-module Diclionary::Markup
+module Diclionary::Text
 	abstract struct Markup
 		include Enumerable(Markup)
 		include Iterable(Markup)
