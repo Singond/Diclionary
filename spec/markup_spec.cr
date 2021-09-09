@@ -135,6 +135,28 @@ describe Markup do
 			PlainText.new("e"),
 			PlainText.new("f")]
 	end
+	it "is indexable" do
+		m = markup("a", markup("b", "c", markup("d", "e"), "f"))
+		m.size.should eq 2
+		m[0].size.should eq 0
+		m[1].size.should eq 4
+		m[1][2].size.should eq 2
+		m[0].should eq PlainText.new("a")
+		m[1].should eq Base.new(PlainText.new("b"),
+			PlainText.new("c"),
+			Base.new(PlainText.new("d"), PlainText.new("e")),
+			PlainText.new("f"))
+		m[1][0].should eq PlainText.new("b")
+		m[1][1].should eq PlainText.new("c")
+		m[1][2].should eq Base.new(PlainText.new("d"), PlainText.new("e"))
+		m[1][2][0].should eq PlainText.new("d")
+		m[1][2][1].should eq PlainText.new("e")
+		m[1][3].should eq PlainText.new("f")
+		m[2]?.should be_nil
+		expect_raises(IndexError) do
+			m[2]
+		end
+	end
 end
 
 describe MarkupWalker do
