@@ -1,6 +1,6 @@
 module Diclionary::Text
 	abstract struct Markup
-		include Enumerable(Markup)
+		include Enumerable({Markup,Bool})
 		include Iterable(Markup)
 		include Indexable(Markup)
 
@@ -41,8 +41,46 @@ module Diclionary::Text
 		end
 
 		def each
-			iter = each()
-			while !(elem = iter.next()).is_a? Iterator::Stop
+			iter = HistIterator.new([self].each)
+			iters = Deque(HistIterator(Markup)).new
+			iters.push iter
+			until iters.empty?
+				elem = iter.next
+				if !elem.is_a?(Iterator::Stop)
+					yield({elem, true})
+					if elem.children().empty?
+						yield({elem, false})
+					else
+						# Recurse into children
+						iter = HistIterator.new(elem.children.each)
+						iters.push iter
+					end
+				else
+					# No more leaves in this branch
+					if !iters.empty?
+						iters.pop
+						if !iters.empty?
+							# Move to sibling branch
+							iter = iters.last
+							if last = iter.current
+								yield({last, false})
+							end
+						end
+					end
+				end
+			end
+		end
+
+		def each_start
+			each do |elem, start|
+				next unless start
+				yield elem
+			end
+		end
+
+		def each_end
+			each do |elem, start|
+				next if start
 				yield elem
 			end
 		end
@@ -129,6 +167,24 @@ module Diclionary::Text
 			String.build do |io|
 				to_ansi io
 			end
+		end
+	end
+
+	# A wrapper around an iterator which keeps track of the last
+	# element returned by `#next`.
+	private class HistIterator(T)
+		@current : T? = nil
+		def initialize(@iter : Iterator(T))
+		end
+
+		def next
+			current = @iter.next
+			@current = current if current.is_a?(T)
+			current
+		end
+
+		def current
+			@current
 		end
 	end
 

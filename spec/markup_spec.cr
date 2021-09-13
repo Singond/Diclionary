@@ -69,6 +69,61 @@ describe Markup do
 				.should eq "A text with a \e[1mbold\e[0m and \e[2mfaint\e[0m word"
 		end
 	end
+	describe "#each_start" do
+		it "enumerates starting points of each element" do
+			a = [] of Markup
+			markup("x").each_start {|e| a << e}
+			a.should eq [PlainText.new("x")]
+			m = markup(markup("x"), "y")
+			a = [] of Markup
+			m.each_start {|e| a << e}
+			a.should eq [m, PlainText.new("x"), PlainText.new("y")]
+			m = markup("a", markup("b", "c", markup("d", "e"), "f"))
+			a = [] of Markup
+			m.each_start {|e| a << e}
+			a.should eq [m,
+				PlainText.new("a"),
+				Base.new(
+					PlainText.new("b"),
+					PlainText.new("c"),
+					Base.new(PlainText.new("d"), PlainText.new("e")),
+					PlainText.new("f")),
+				PlainText.new("b"),
+				PlainText.new("c"),
+				Base.new(PlainText.new("d"), PlainText.new("e")),
+				PlainText.new("d"),
+				PlainText.new("e"),
+				PlainText.new("f")]
+		end
+	end
+	describe "#each_end" do
+		it "enumerates ending points of each element" do
+			a = [] of Markup
+			markup("x").each_end {|e| a << e}
+			a.should eq [PlainText.new("x")]
+			m = markup(markup("x"), "y")
+			a = [] of Markup
+			m.each_end {|e| a << e}
+			a.should eq [PlainText.new("x"), PlainText.new("y"), m]
+			m = markup("a", markup("b", "c", markup("d", "e"), "f"))
+			a = [] of Markup
+			m.each_end {|e| a << e}
+			a.should eq [
+				PlainText.new("a"),
+				PlainText.new("b"),
+				PlainText.new("c"),
+				PlainText.new("d"),
+				PlainText.new("e"),
+				Base.new(PlainText.new("d"), PlainText.new("e")),
+				PlainText.new("f"),
+				Base.new(
+					PlainText.new("b"),
+					PlainText.new("c"),
+					Base.new(PlainText.new("d"), PlainText.new("e")),
+					PlainText.new("f")),
+				m]
+		end
+	end
 
 	it "can be nested" do
 		m = markup("a", markup("b", "c", markup("d"), "e"))
@@ -80,29 +135,55 @@ describe Markup do
 		m.children[1].children[3].should eq PlainText.new("e")
 	end
 	it "is enumerable" do
-		markup("x").to_a.should eq [PlainText.new("x")]
+		m = markup("x")
+		a = [] of {Markup, Bool}
+		m.each {|t| a << t}
+		a.should eq [
+			{PlainText.new("x"), true}, {PlainText.new("x"), false}]
 		m = markup(markup("x"), "y")
-		m.to_a.should eq [m, PlainText.new("x"), PlainText.new("y")]
+		a = [] of {Markup, Bool}
+		m.each {|t| a << t}
+		a.should eq [
+			{m, true},
+			{PlainText.new("x"), true}, {PlainText.new("x"), false},
+			{PlainText.new("y"), true}, {PlainText.new("y"), false},
+			{m, false}]
 		m = markup("a", markup("b", "c", markup("d", "e"), "f"))
-		m.to_a.should eq [m,
-			PlainText.new("a"),
-			Base.new(
+		a = [] of {Markup, Bool}
+		m.each {|t| a << t}
+		a.should eq [
+			{m, true},
+			{PlainText.new("a"), true},
+			{PlainText.new("a"), false},
+			{Base.new(
 				PlainText.new("b"),
 				PlainText.new("c"),
 				Base.new(PlainText.new("d"), PlainText.new("e")),
-				PlainText.new("f")),
-			PlainText.new("b"),
-			PlainText.new("c"),
-			Base.new(PlainText.new("d"), PlainText.new("e")),
-			PlainText.new("d"),
-			PlainText.new("e"),
-			PlainText.new("f")]
+				PlainText.new("f")), true},
+			{PlainText.new("b"), true},
+			{PlainText.new("b"), false},
+			{PlainText.new("c"), true},
+			{PlainText.new("c"), false},
+			{Base.new(PlainText.new("d"), PlainText.new("e")), true},
+			{PlainText.new("d"), true},
+			{PlainText.new("d"), false},
+			{PlainText.new("e"), true},
+			{PlainText.new("e"), false},
+			{Base.new(PlainText.new("d"), PlainText.new("e")), false},
+			{PlainText.new("f"), true},
+			{PlainText.new("f"), false},
+			{Base.new(
+				PlainText.new("b"),
+				PlainText.new("c"),
+				Base.new(PlainText.new("d"), PlainText.new("e")),
+				PlainText.new("f")), false},
+			{m, false}]
 	end
 	it "supports other Enumerable methods" do
 		m = markup("a", markup("b", "c", markup("d"), "e"))
 		arr = [] of Markup
-		m.each_with_object(arr) do |e, a|
-			a << e
+		m.each_with_object(arr) do |(elem, start), a|
+			a << elem if start
 		end
 		arr.should eq [m,
 			PlainText.new("a"),
