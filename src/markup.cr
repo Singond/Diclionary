@@ -2,7 +2,6 @@ module Diclionary::Text
 	abstract struct Markup
 		include Enumerable({Markup,Bool})
 		include Iterable(Markup)
-		include Indexable(Markup)
 
 		def children
 			[] of Markup
@@ -93,8 +92,12 @@ module Diclionary::Text
 			children.size
 		end
 
-		def unsafe_fetch(index : Int)
+		def [](index : Int)
 			children[index]
+		end
+
+		def []?(index : Int)
+			children[index]?
 		end
 
 		# Converts the rich text into text with ANSI escape codes
