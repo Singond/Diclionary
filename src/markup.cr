@@ -1,7 +1,7 @@
 module Diclionary::Text
 	abstract struct Markup
 		include Enumerable({Markup,Bool})
-		include Iterable(Markup)
+		include Iterable({Markup,Bool})
 
 		def children
 			[] of Markup
@@ -266,14 +266,14 @@ module Diclionary::Text
 	end
 
 	class MarkupIterator
-		include Iterator(Markup)
+		include Iterator({Markup, Bool})
 
-		@iters : Deque(Iterator(Markup))
-		@iter : Iterator(Markup)
+		@iters : Deque(HistIterator(Markup))
+		@iter : HistIterator(Markup)
 
 		def initialize(markup : Markup)
-			@iter = [markup].each
-			@iters = Deque(Iterator(Markup)).new
+			@iter = HistIterator.new(([markup] of Markup).each)
+			@iters = Deque(HistIterator(Markup)).new
 			@iters.push @iter
 		end
 
@@ -282,21 +282,24 @@ module Diclionary::Text
 			if !elem.is_a?(Iterator::Stop)
 				if !elem.children().empty?
 					# Recurse into children
-					@iter = elem.children.each
+					@iter = HistIterator.new(elem.children.each)
 					@iters.push @iter
 				end
+				return {elem, true}
 			else
 				# No more leaves in this branch
-				while elem.is_a?(Iterator::Stop) && !@iters.empty?
+				if !@iters.empty?
 					@iters.pop
 					if !@iters.empty?
 						# Move to sibling branch
 						@iter = @iters.last
-						elem = @iter.next
+						if last = @iter.current
+							return {last, false}
+						end
 					end
 				end
 			end
-			elem
+			stop
 		end
 	end
 

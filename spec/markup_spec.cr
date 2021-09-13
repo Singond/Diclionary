@@ -234,11 +234,13 @@ describe Markup do
 			PlainText.new("e")]
 	end
 	it "is iterable" do
-		markup("x").each.to_a.should eq [PlainText.new("x")]
+		markup("x").each.select{|(_, start)| start}.map{|(e,_)| e}
+			.to_a.should eq [PlainText.new("x")]
 		m = markup(markup("x"), "y")
-		m.each.to_a.should eq [m, PlainText.new("x"), PlainText.new("y")]
+		m.each.select{|(_, start)| start}.map{|(e,_)| e}
+			.to_a.should eq [m, PlainText.new("x"), PlainText.new("y")]
 		m = markup("a", markup("b", "c", markup("d", "e"), "f"))
-		m.each.to_a.should eq [m,
+		m.each.select{|(_, start)| start}.map{|(e,_)| e}.to_a.should eq [m,
 			PlainText.new("a"),
 			Base.new(
 				PlainText.new("b"),
