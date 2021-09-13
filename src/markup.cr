@@ -40,7 +40,7 @@ module Diclionary::Text
 		end
 
 		def each
-			iter = HistIterator.new([self].each)
+			iter = HistIterator.new(([self] of Markup).each)
 			iters = Deque(HistIterator(Markup)).new
 			iters.push iter
 			until iters.empty?

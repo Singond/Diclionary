@@ -61,6 +61,9 @@ describe Markup do
 		end
 	end
 	describe "#to_ansi" do
+		it "does not fail when invoked on Markup subtype" do
+			markup(paragraph("x"), paragraph("y", "z")).to_ansi
+		end
 		it "prints the text with ANSI escape codes" do
 			m = markup("A text with a ", bold("bold"), " word")
 			m.to_ansi.should eq "A text with a \e[1mbold\e[0m word"
