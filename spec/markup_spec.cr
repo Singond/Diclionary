@@ -98,6 +98,39 @@ describe Markup do
 				PlainText.new("e"),
 				PlainText.new("f")]
 		end
+		it "allows extracting the text content" do
+			m = markup("a", bold("b"), "c")
+			str = ""
+			m.each_start do |e|
+				case e
+				when PlainText
+					str += e.text
+				end
+			end
+			str.should eq "abc"
+		end
+		it "allows rewriting the tree into another representation" do
+			m = markup("a ", bold("bold and also ", italic("italic")), " text")
+			str = ""
+			m.each do |e, start|
+				if start
+					case e
+					when PlainText
+						str += e.text
+					when Bold
+						str += %q(\textbf{)
+					when Italic
+						str += %q(\textit{)
+					end
+				else
+					case e
+					when Bold, Italic
+						str += '}'
+					end
+				end
+			end
+			str.should eq %q(a \textbf{bold and also \textit{italic}} text)
+		end
 	end
 	describe "#each_end" do
 		it "enumerates ending points of each element" do
@@ -239,65 +272,6 @@ describe Markup do
 		m[2]?.should be_nil
 		expect_raises(IndexError) do
 			m[2]
-		end
-	end
-end
-
-describe MarkupWalker do
-	describe "#walk" do
-		it "does not fail when not initialized" do
-			m = markup("a", bold("b"), "c")
-			v = MarkupWalker.new
-			v.walk(m)
-		end
-		it "allows walking the markup tree in proper order" do
-			m = markup("a", bold("b"), "c")
-			v = MarkupWalker.new
-			arr = [] of Markup
-			v.open do |e|
-				arr << e
-			end
-			v.walk(m)
-			arr.should eq [m, markup("a"), bold("b"), markup("b"), markup("c")]
-		end
-		# it "allows executing custom code on entering and leaving elements" do
-		#
-		# end
-		it "allows extracting the text content" do
-			m = markup("a", bold("b"), "c")
-			v = MarkupWalker.new
-			str = ""
-			v.open do |e|
-				case e
-				when PlainText
-					str += e.text
-				end
-			end
-			v.walk(m)
-			str.should eq "abc"
-		end
-		it "allows rewriting the tree into another representation" do
-			m = markup("a ", bold("bold and also ", italic("italic")), " text")
-			v = MarkupWalker.new
-			str = ""
-			v.open do |e|
-				case e
-				when PlainText
-					str += e.text
-				when Bold
-					str += %q(\textbf{)
-				when Italic
-					str += %q(\textit{)
-				end
-			end
-			v.close do |e|
-				case e
-				when Bold, Italic
-					str += '}'
-				end
-			end
-			v.walk(m)
-			str.should eq %q(a \textbf{bold and also \textit{italic}} text)
 		end
 	end
 end

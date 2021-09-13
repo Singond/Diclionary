@@ -109,61 +109,60 @@ module Diclionary::Text
 			bold = 0
 			italic = 0
 			dim = 0
-			mw = MarkupWalker.new
-			mw.open do |e|
-				whitespace_written = false
-				case e
-				when PlainText
-					next if e.text.empty?
-					at_start = false
-					c = Colorize.with
-					if bold > 0
-						c = c.bold
-					end
-					if dim > 0
-						c = c.dim
-					end
-					io << pending_whitespace
-					whitespace_written = true
-					c.surround(io) do
-						io << "\e[3m" if italic > 0
-						io << e.text
-						io << "\e[0m" if italic > 0
-					end
-				when Bold
-					bold += 1
-				when Italic
-					italic += 1
-				when Small
-					dim += 1
-				when Paragraph
-					next if e.text.empty?
-					if pending_whitespace.ends_with? "\n\n"
+			each do |e, start|
+				if start
+					whitespace_written = false
+					case e
+					when PlainText
+						next if e.text.empty?
+						at_start = false
+						c = Colorize.with
+						if bold > 0
+							c = c.bold
+						end
+						if dim > 0
+							c = c.dim
+						end
 						io << pending_whitespace
 						whitespace_written = true
-					elsif pending_whitespace.ends_with? "\n"
-						io << pending_whitespace
-						whitespace_written = true
-						io << "\n"
-					elsif !at_start
-						io << "\n\n"
+						c.surround(io) do
+							io << "\e[3m" if italic > 0
+							io << e.text
+							io << "\e[0m" if italic > 0
+						end
+					when Bold
+						bold += 1
+					when Italic
+						italic += 1
+					when Small
+						dim += 1
+					when Paragraph
+						next if e.text.empty?
+						if pending_whitespace.ends_with? "\n\n"
+							io << pending_whitespace
+							whitespace_written = true
+						elsif pending_whitespace.ends_with? "\n"
+							io << pending_whitespace
+							whitespace_written = true
+							io << "\n"
+						elsif !at_start
+							io << "\n\n"
+						end
+					end
+					pending_whitespace = "" if whitespace_written
+				else
+					case e
+					when Bold
+						bold -= 1
+					when Italic
+						italic -= 1
+					when Small
+						dim -= 1
+					when Paragraph
+						pending_whitespace = "\n\n" unless e.text.empty?
 					end
 				end
-				pending_whitespace = "" if whitespace_written
 			end
-			mw.close do |e|
-				case e
-				when Bold
-					bold -= 1
-				when Italic
-					italic -= 1
-				when Small
-					dim -= 1
-				when Paragraph
-					pending_whitespace = "\n\n" unless e.text.empty?
-				end
-			end
-			mw.walk(self)
 		end
 
 		def to_ansi
@@ -263,27 +262,6 @@ module Diclionary::Text
 			to_markup(content[0])
 		else
 			Base.new(*content)
-		end
-	end
-
-	class MarkupWalker
-		@open : Proc(Markup, Nil) = ->(m : Markup) {}
-		@close : Proc(Markup, Nil) = ->(m : Markup) {}
-
-		def open(&block : Markup -> Nil)
-			@open = block
-		end
-
-		def close(&block : Markup -> Nil)
-			@close = block
-		end
-
-		def walk(elem : Markup)
-			@open.call(elem)
-			elem.children.each do |e|
-				walk(e)
-			end
-			@close.call(elem)
 		end
 	end
 
