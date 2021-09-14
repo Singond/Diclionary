@@ -280,6 +280,7 @@ module Diclionary::Text
 
 		@iters : Deque(HistIterator(Markup))
 		@iter : HistIterator(Markup)
+		@last : Markup?
 
 		def initialize(markup : Markup)
 			@iter = HistIterator.new(([markup] of Markup).each)
@@ -288,9 +289,17 @@ module Diclionary::Text
 		end
 
 		def next
+			# Close leaf element
+			if last = @last
+				@last = nil
+				return {last, false}
+			end
+			# Else get next element from the current iterator
 			elem = @iter.next
 			if !elem.is_a?(Iterator::Stop)
-				if !elem.children().empty?
+				if elem.children().empty?
+					@last = elem
+				else
 					# Recurse into children
 					@iter = HistIterator.new(elem.children.each)
 					@iters.push @iter
