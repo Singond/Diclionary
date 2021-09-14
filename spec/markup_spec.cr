@@ -72,7 +72,7 @@ describe Markup do
 				.should eq "A text with a \e[1mbold\e[0m and \e[2mfaint\e[0m word"
 		end
 	end
-	describe "#each_start" do
+	describe "#each_start(&)" do
 		it "enumerates starting points of each element" do
 			a = [] of Markup
 			markup("x").each_start {|e| a << e}
@@ -132,7 +132,7 @@ describe Markup do
 			str.should eq %q(a \textbf{bold and also \textit{italic}} text)
 		end
 	end
-	describe "#each_end" do
+	describe "#each_end(&)" do
 		it "enumerates ending points of each element" do
 			a = [] of Markup
 			markup("x").each_end {|e| a << e}
@@ -145,6 +145,92 @@ describe Markup do
 			a = [] of Markup
 			m.each_end {|e| a << e}
 			a.should eq [
+				PlainText.new("a"),
+				PlainText.new("b"),
+				PlainText.new("c"),
+				PlainText.new("d"),
+				PlainText.new("e"),
+				Base.new(PlainText.new("d"), PlainText.new("e")),
+				PlainText.new("f"),
+				Base.new(
+					PlainText.new("b"),
+					PlainText.new("c"),
+					Base.new(PlainText.new("d"), PlainText.new("e")),
+					PlainText.new("f")),
+				m]
+		end
+	end
+	describe "#each()" do
+		it "returns an iterator over the start and end of each element" do
+			m = markup("x")
+			m.each.to_a.should eq [
+				{PlainText.new("x"), true}, {PlainText.new("x"), false}]
+			m = markup(markup("x"), "y")
+			m.each.to_a.should eq [
+				{m, true},
+				{PlainText.new("x"), true}, {PlainText.new("x"), false},
+				{PlainText.new("y"), true}, {PlainText.new("y"), false},
+				{m, false}]
+			m = markup("a", markup("b", "c", markup("d", "e"), "f"))
+			m.each.to_a.should eq [
+				{m, true},
+				{PlainText.new("a"), true},
+				{PlainText.new("a"), false},
+				{Base.new(
+					PlainText.new("b"),
+					PlainText.new("c"),
+					Base.new(PlainText.new("d"), PlainText.new("e")),
+					PlainText.new("f")), true},
+				{PlainText.new("b"), true},
+				{PlainText.new("b"), false},
+				{PlainText.new("c"), true},
+				{PlainText.new("c"), false},
+				{Base.new(PlainText.new("d"), PlainText.new("e")), true},
+				{PlainText.new("d"), true},
+				{PlainText.new("d"), false},
+				{PlainText.new("e"), true},
+				{PlainText.new("e"), false},
+				{Base.new(PlainText.new("d"), PlainText.new("e")), false},
+				{PlainText.new("f"), true},
+				{PlainText.new("f"), false},
+				{Base.new(
+					PlainText.new("b"),
+					PlainText.new("c"),
+					Base.new(PlainText.new("d"), PlainText.new("e")),
+					PlainText.new("f")), false},
+				{m, false}]
+		end
+	end
+	describe "#each_start()" do
+		it "returns an iterator over the start of each element" do
+			markup("x").each_start.to_a.should eq [PlainText.new("x")]
+			m = markup(markup("x"), "y")
+			m.each_start.to_a.should eq [
+				m, PlainText.new("x"), PlainText.new("y")]
+			m = markup("a", markup("b", "c", markup("d", "e"), "f"))
+			m.each_start.to_a.should eq [m,
+				PlainText.new("a"),
+				Base.new(
+					PlainText.new("b"),
+					PlainText.new("c"),
+					Base.new(PlainText.new("d"), PlainText.new("e")),
+					PlainText.new("f")),
+				PlainText.new("b"),
+				PlainText.new("c"),
+				Base.new(PlainText.new("d"), PlainText.new("e")),
+				PlainText.new("d"),
+				PlainText.new("e"),
+				PlainText.new("f")]
+		end
+	end
+	describe "#each_end()" do
+		it "returns an iterator over the end of each element" do
+			markup("x").each_end.to_a.should eq [PlainText.new("x")]
+			m = markup(markup("x"), "y")
+			m.each_end.to_a.should eq [
+				PlainText.new("x"), PlainText.new("y"), m]
+			m = markup("a", markup("b", "c", markup("d", "e"), "f"))
+			m.each_end.to_a.should eq [
 				PlainText.new("a"),
 				PlainText.new("b"),
 				PlainText.new("c"),
@@ -234,25 +320,7 @@ describe Markup do
 			PlainText.new("e")]
 	end
 	it "is iterable" do
-		markup("x").each.select{|(_, start)| start}.map{|(e,_)| e}
-			.to_a.should eq [PlainText.new("x")]
-		m = markup(markup("x"), "y")
-		m.each.select{|(_, start)| start}.map{|(e,_)| e}
-			.to_a.should eq [m, PlainText.new("x"), PlainText.new("y")]
-		m = markup("a", markup("b", "c", markup("d", "e"), "f"))
-		m.each.select{|(_, start)| start}.map{|(e,_)| e}.to_a.should eq [m,
-			PlainText.new("a"),
-			Base.new(
-				PlainText.new("b"),
-				PlainText.new("c"),
-				Base.new(PlainText.new("d"), PlainText.new("e")),
-				PlainText.new("f")),
-			PlainText.new("b"),
-			PlainText.new("c"),
-			Base.new(PlainText.new("d"), PlainText.new("e")),
-			PlainText.new("d"),
-			PlainText.new("e"),
-			PlainText.new("f")]
+		markup("x").each.should be_a MarkupIterator
 	end
 	it "can be indexed with []" do
 		m = markup("a", markup("b", "c", markup("d", "e"), "f"))
