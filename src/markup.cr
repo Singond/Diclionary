@@ -88,6 +88,16 @@ module Diclionary::Text
 			MarkupIterator.new(self)
 		end
 
+		def each_start
+			each.select {|(_, start)| start}
+				.map {|(elem,_)| elem}
+		end
+
+		def each_end
+			each.select {|(_, start)| !start}
+				.map {|(elem,_)| elem}
+		end
+
 		def size
 			children.size
 		end
