@@ -254,7 +254,7 @@ describe Markup do
 			PlainText.new("e"),
 			PlainText.new("f")]
 	end
-	it "is indexable" do
+	it "can be indexed with []" do
 		m = markup("a", markup("b", "c", markup("d", "e"), "f"))
 		m.size.should eq 2
 		m[0].size.should eq 0
