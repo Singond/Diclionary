@@ -5,6 +5,9 @@ module Diclionary::Text
 	extend self
 
 	struct TerminalStyle
+		property line_width = 0
+		property justify = false
+
 		DEFAULT = TerminalStyle.new
 	end
 
@@ -17,7 +20,7 @@ module Diclionary::Text
 		italic = 0
 		dim = 0
 
-		lw = LineWrapper.new(io, 80, true)
+		lw = LineWrapper.new(io, style.line_width, style.justify)
 
 		text.each do |e, start|
 			if start
@@ -156,6 +159,11 @@ module Diclionary::Text
 		end
 
 		def write(bytes : Bytes) : Nil
+			if @line_width < 1
+				@io.write(bytes)
+				return
+			end
+
 			word = String.build do |io|
 				io.write(bytes)
 			end
@@ -166,7 +174,10 @@ module Diclionary::Text
 		end
 
 		def write(word : Printable)
-			if (@words_length + @nonprintables_length + word.length) <= @line_width
+			if @line_width < 1
+				@io << word.value
+			elsif (@words_length + @nonprintables_length + word.length) \
+					<= @line_width
 				# Word fits into the current line width:
 				# Just append it to the list of words in current line.
 				@words += @nonprintables
@@ -190,6 +201,11 @@ module Diclionary::Text
 		end
 
 		def write(word : Whitespace | Control)
+			if @line_width < 1
+				@io << word.value
+				return
+			end
+
 			@nonprintables << word
 			@nonprintables_length += word.length
 			# If a newline is included, print the line now, unjustified.
