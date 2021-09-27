@@ -7,6 +7,9 @@ module Diclionary::Text
 	struct TerminalStyle
 		property line_width = 0
 		property justify = false
+		property paragraph_indent = 0
+		property left_margin = 0
+		property right_margin = 0
 
 		DEFAULT = TerminalStyle.new
 	end
@@ -21,9 +24,12 @@ module Diclionary::Text
 		dim = 0
 
 		lw = LineWrapper.new(io, style.line_width, style.justify)
+		lw.left_skip = style.left_margin
+		lw.right_skip = style.right_margin
 
 		text.each do |e, start|
 			if start
+				# Entering element 'e'
 				whitespace_written = false
 				case e
 				when PlainText
@@ -65,6 +71,8 @@ module Diclionary::Text
 				when Small
 					dim += 1
 				when Paragraph
+					lw.next_left_skip = \
+							style.left_margin + style.paragraph_indent
 					next if e.text.empty?
 					if pending_whitespace.ends_with? "\n\n"
 						io << pending_whitespace
@@ -79,6 +87,7 @@ module Diclionary::Text
 				end
 				pending_whitespace = "" if whitespace_written
 			else
+				# Leaving element 'e'
 				case e
 				when Bold
 					bold -= 1
@@ -143,15 +152,41 @@ module Diclionary::Text
 
 	private class LineWrapper < IO
 		@io : IO
-		@line_width : Int32
-		@justify_width : Int32
+		@width : Int32
+		@next_left_skip : Int32 = 0
+		@left_skip : Int32 = 0
+		@right_skip : Int32 = 0
+		@line_width : Int32 = 0
+		@justify : Bool
+		@justify_width : Int32 = 0
+
 		@words = [] of Word
 		@words_length = 0
 		@nonprintables : Array(Whitespace | Control) = [] of Whitespace | Control
 		@nonprintables_length = 0
 
-		def initialize(@io, @line_width = 0, justify = false)
-			@justify_width = justify ? @line_width : 0
+		def initialize(@io, @width = 0, @justify = false)
+			update_widths
+		end
+
+		def left_skip=(skip : Int32)
+			@left_skip = skip
+			update_widths
+		end
+
+		def next_left_skip=(skip : Int32)
+			@next_left_skip = skip
+			update_widths
+		end
+
+		def right_skip=(skip : Int32)
+			@right_skip = skip
+			update_widths
+		end
+
+		private def update_widths
+			@line_width = @width - (@next_left_skip + @right_skip)
+			@justify_width = @justify ? @line_width : 0
 		end
 
 		def read(bytes : Bytes)
@@ -221,6 +256,12 @@ module Diclionary::Text
 		end
 
 		private def print_line(io : IO, words : Array(Word), justify_width = 0)
+			this_left_skip = @next_left_skip
+			@next_left_skip = @left_skip
+			unless @left_skip == this_left_skip
+				update_widths
+			end
+
 			if words.empty?
 				return
 			end
@@ -243,6 +284,7 @@ module Diclionary::Text
 			end
 
 			# Print it
+			io << " " * this_left_skip
 			idx = 0
 			words.each do |w|
 				io << w.value

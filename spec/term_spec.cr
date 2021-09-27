@@ -110,6 +110,40 @@ describe Diclionary::Text do
 			formatted = String.build {|io| format Lipsum[2], io, just}
 			formatted.should_be_justified(100)
 		end
+		it "can indent the first line of a paragraph" do
+			style = just_80
+			style.paragraph_indent = 4
+			formatted = String.build {|io| format Lipsum[1], io, style}
+			formatted.each_line.with_index do |line, number|
+				if number == 0
+					line.starts_with?("    ").should be_true
+				else
+					line.starts_with?(" ").should be_false
+				end
+			end
+		end
+		it "can print text with margins" do
+			style = just_80
+			style.paragraph_indent = 2
+			style.left_margin = 2
+			style.right_margin = 2
+			formatted = String.build {|io| format Lipsum[1], io, style}
+			formatted.each_line.with_index do |line, number|
+				visible = line.gsub(/\e\[[0-9]+m/, "")
+				if number == 0
+					# First line
+					line.starts_with?("    ").should be_true
+					visible.strip.size.should eq 74
+				elsif number == formatted.lines.size - 1
+					# Last line
+					line.starts_with?("  ").should be_true
+				else
+					# Other lines
+					line.starts_with?("  ").should be_true
+					visible.strip.size.should eq 76
+				end
+			end
+		end
 		# it "can stretch several paragraphs to fill lines" do
 		# 	formatted = String.build {|io| format Lipsum, io}
 		# 	formatted.should_be_justified(80)
