@@ -144,6 +144,28 @@ describe Diclionary::Text do
 				end
 			end
 		end
+		it "separates paragraphs from surrounding text by blank lines" do
+			style = TerminalStyle.new()
+			style.line_width = 40
+			m = markup("Line outside paragraph.",
+				paragraph(<<-PAR),
+					This is the beginning of a paragraph. \
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+					PAR
+				"Outside paragraph again.")
+			formatted = String.build {|io| format m, io, style}
+			formatted.should eq <<-EXPECTED
+				Line outside paragraph.
+
+				This is the beginning of a paragraph.
+				Lorem ipsum dolor sit amet, consectetur
+				adipiscing elit.
+
+				Outside paragraph again.
+
+				EXPECTED
+				#-------------- 40 chars --------------#
+		end
 		# it "can stretch several paragraphs to fill lines" do
 		# 	formatted = String.build {|io| format Lipsum, io}
 		# 	formatted.should_be_justified(80)

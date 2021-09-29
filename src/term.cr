@@ -71,18 +71,18 @@ module Diclionary::Text
 				when Small
 					dim += 1
 				when Paragraph
+					unless lw.empty?
+						lw.flush
+						pending_whitespace = "\n"
+					end
 					lw.next_left_skip = \
 							style.left_margin + style.paragraph_indent
 					next if e.text.empty?
-					if pending_whitespace.ends_with? "\n\n"
+					if pending_whitespace.ends_with? "\n"
 						io << pending_whitespace
 						whitespace_written = true
-					elsif pending_whitespace.ends_with? "\n"
-						io << pending_whitespace
-						whitespace_written = true
-						io << "\n"
 					elsif !at_start
-						io << "\n\n"
+						io << "\n"
 					end
 				end
 				pending_whitespace = "" if whitespace_written
@@ -97,7 +97,7 @@ module Diclionary::Text
 					dim -= 1
 				when Paragraph
 					lw.flush
-					pending_whitespace = "\n\n" unless e.text.empty?
+					pending_whitespace = "\n" unless e.text.empty?
 				end
 			end
 		end
@@ -301,6 +301,10 @@ module Diclionary::Text
 				end
 			end
 			io << "\n"
+		end
+
+		def empty?
+			@words.empty?
 		end
 
 		def flush
