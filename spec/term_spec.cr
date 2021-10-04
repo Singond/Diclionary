@@ -172,3 +172,39 @@ describe Diclionary::Text do
 		# end
 	end
 end
+
+describe LineWrapper do
+	it do
+		io = IO::Memory.new
+		lw = LineWrapper.new(io, 80, true)
+		lw.line_width.should eq 80
+		lw.left_skip = 2
+		lw.line_width.should eq 78
+		lw.right_skip = 2
+		lw.line_width.should eq 76
+		lw.next_left_skip = 2 + 2
+		lw.line_width.should eq 74
+		lw.write(Printable.new("word"))
+		lw.line_width.should eq 74
+	end
+	it do
+		formatted = String.build do |io|
+			lw = LineWrapper.new(io, 80, true)
+			lw.left_skip = 2
+			lw.right_skip = 2
+			lw.next_left_skip = 2 + 2
+			s = <<-TEXT
+				Ut sit amet elementum erat. \
+				Morbi auctor ante sit amet justo molestie interdum.
+				TEXT
+			s.split ' ' do |word|
+				lw.write(Printable.new(word))
+				lw.write(Whitespace.new(" "))
+			end
+			lw.flush
+		end
+		lines = formatted.lines
+		lines[0].starts_with?("    ").should be_true
+		lines[0].strip.size.should eq 74
+	end
+end
