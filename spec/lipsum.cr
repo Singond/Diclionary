@@ -75,6 +75,5 @@ Lipsum = markup(
 			Sed sit amet tellus et velit luctus laoreet quis sed urna. \
 			Sed dictum fringilla nibh sit amet tempor.
 			TEXT
-			# Proin elementum risus ut leo porttitor tristique.
 	)
 )
