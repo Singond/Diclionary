@@ -7,6 +7,9 @@ require "./lipsum.cr"
 include Diclionary
 include Diclionary::Text
 
+wrap_80 = TerminalStyle.new
+wrap_80.line_width = 80
+
 just_80 = TerminalStyle.new
 just_80.line_width = 80
 just_80.justify = true
@@ -165,6 +168,24 @@ describe Diclionary::Text do
 
 				EXPECTED
 				#-------------- 40 chars --------------#
+		end
+		it "prints ordered lists" do
+			formatted = String.build {|io| format Lipsum[3], io, wrap_80}
+			formatted.should eq <<-EXPECTED
+				Donec sit amet facilisis lectus. Integer et fringilla velit. Sed aliquam eros ac
+				turpis tristique mollis. Maecenas luctus magna ac elit euismod fermentum.
+				 1. Curabitur pulvinar purus imperdiet purus fringilla, venenatis facilisis quam
+				    efficitur. Nunc justo diam, interdum ut varius a, laoreet ut justo.
+				 2. Sed rutrum pulvinar sapien eget feugiat.
+				 3. Nulla vulputate mollis nisl eu venenatis. Vestibulum consectetur lorem
+				    augue, sed dictum arcu vulputate quis. Phasellus a velit velit. Morbi auctor
+				    ante sit amet justo molestie interdum. Fusce sed condimentum neque, nec
+				    aliquam magna. Maecenas et mollis risus, in facilisis nisl.
+				Proin elementum risus ut leo porttitor tristique. Sed sit amet tellus et velit
+				luctus laoreet quis sed urna. Sed dictum fringilla nibh sit amet tempor.
+
+				EXPECTED
+				#---------------------------------- 80 chars ----------------------------------#
 		end
 		# it "can stretch several paragraphs to fill lines" do
 		# 	formatted = String.build {|io| format Lipsum, io}
