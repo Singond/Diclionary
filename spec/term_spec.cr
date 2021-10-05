@@ -221,7 +221,7 @@ describe Diclionary::Text do
 end
 
 describe LineWrapper do
-	it do
+	it "enables setting the line width and margins" do
 		io = IO::Memory.new
 		lw = LineWrapper.new(io, 80, true)
 		lw.line_width.should eq 80
@@ -234,7 +234,7 @@ describe LineWrapper do
 		lw.write(Printable.new("word"))
 		lw.line_width.should eq 74
 	end
-	it do
+	it "prints text with configurable line width and margins" do
 		formatted = String.build do |io|
 			lw = LineWrapper.new(io, 80, true)
 			lw.left_skip = 2
