@@ -187,7 +187,7 @@ describe Diclionary::Text do
 				EXPECTED
 				#---------------------------------- 80 chars ----------------------------------#
 		end
-		it "prints ordered lists with style" do
+		it "prints ordered lists with configurable style" do
 			style = TerminalStyle.new()
 			style.line_width = 60
 			style.list_indent = 6
