@@ -357,4 +357,24 @@ module Diclionary::Text
 	def paragraph(*content : Markup | String)
 		Paragraph.new(*content)
 	end
+
+	struct OrderedList < Container
+		@@html_tag = "ol"
+
+		def initialize(items : Array(Markup))
+			@value = items
+		end
+	end
+
+	def ordered_list(*items : Item)
+		OrderedList.new(items.to_a.map{|i| i.as Markup})
+	end
+
+	struct Item < Container
+		@@html_tag = "li"
+	end
+
+	def item(*content : Markup | String)
+		Item.new(*content)
+	end
 end

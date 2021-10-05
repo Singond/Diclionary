@@ -22,6 +22,9 @@ module Diclionary::Text
 		bold = 0
 		italic = 0
 		dim = 0
+		numbering = Deque(Int32).new
+		in_ordered_list = false
+		indentation_level = 0
 
 		lw = LineWrapper.new(io, style.line_width, style.justify)
 		lw.left_skip = style.left_margin
@@ -84,6 +87,20 @@ module Diclionary::Text
 					elsif !at_start
 						io << "\n"
 					end
+				when OrderedList
+					unless lw.empty?
+						lw.flush
+					end
+					numbering.push 0
+					indentation_level += 1
+					lw.left_skip = 4 * indentation_level
+				when Item
+					n = numbering.pop + 1
+					numbering.push n
+					indent = 4 * indentation_level
+					io << "#{n}. ".rjust(indent)
+					lw.next_left_skip = 0
+					lw.line_width = style.line_width - indent
 				end
 				pending_whitespace = "" if whitespace_written
 			else
@@ -98,6 +115,14 @@ module Diclionary::Text
 				when Paragraph
 					lw.flush unless lw.empty?
 					pending_whitespace = "\n" unless e.text.empty?
+				when OrderedList
+					lw.flush unless lw.empty?
+					numbering.pop unless numbering.empty?
+					indentation_level -= 1
+					lw.next_left_skip = 4 * indentation_level
+					lw.left_skip = 4 * indentation_level
+				when Item
+					lw.flush unless lw.empty?
 				end
 			end
 		end
