@@ -10,6 +10,7 @@ module Diclionary::Text
 		property paragraph_indent = 0
 		property left_margin = 0
 		property right_margin = 0
+		property list_indent = 4
 
 		DEFAULT = TerminalStyle.new
 	end
@@ -93,11 +94,11 @@ module Diclionary::Text
 					end
 					numbering.push 0
 					indentation_level += 1
-					lw.left_skip = 4 * indentation_level
+					lw.left_skip = style.list_indent * indentation_level
 				when Item
 					n = numbering.pop + 1
 					numbering.push n
-					indent = 4 * indentation_level
+					indent = style.list_indent * indentation_level
 					io << "#{n}. ".rjust(indent)
 					lw.next_left_skip = 0
 					lw.line_width = style.line_width - indent
@@ -119,8 +120,8 @@ module Diclionary::Text
 					lw.flush unless lw.empty?
 					numbering.pop unless numbering.empty?
 					indentation_level -= 1
-					lw.next_left_skip = 4 * indentation_level
-					lw.left_skip = 4 * indentation_level
+					lw.next_left_skip = style.list_indent * indentation_level
+					lw.left_skip = style.list_indent * indentation_level
 				when Item
 					lw.flush unless lw.empty?
 				end
