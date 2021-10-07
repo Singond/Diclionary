@@ -42,9 +42,9 @@ class String
 	end
 end
 
-describe Diclionary::Text do
-	describe "#format" do
-		it "does not wrap lines by default" do
+describe "#format" do
+	context "in default configuration" do
+		it "does not wrap lines" do
 			formatted = String.build {|io| format Lipsum[0], io}
 			formatted.each_line.size.should eq 1
 			formatted = String.build {|io| format Lipsum[1], io}
@@ -52,7 +52,9 @@ describe Diclionary::Text do
 			formatted = String.build {|io| format Lipsum[2], io}
 			formatted.each_line.size.should eq 1
 		end
-		it "can stretch plain text to fill lines" do
+	end
+	context "when configured to justify lines to 80 characters" do
+		it "stretches plain text to fill lines" do
 			m = markup(<<-TEXT)
 				Lorem ipsum dolor sit amet, consectetur adipiscing elit. \
 				Etiam nec tortor id magna vulputate pretium.
@@ -60,26 +62,26 @@ describe Diclionary::Text do
 			formatted = String.build {|io| format m, io, just_80}
 			formatted.should_be_justified(80)
 		end
-		it "can stretch multi-part text to fill lines" do
+		it "stretches multi-part text to fill lines" do
 			m = markup(
 				"Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
 				"Etiam nec tortor id ", "magna", " vulputate pretium.")
 			formatted = String.build {|io| format m, io, just_80}
 			formatted.should_be_justified(80)
 		end
-		it "can stretch marked-up text to fill lines" do
+		it "stretches marked-up text to fill lines" do
 			m = markup(
 				"Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
 				"Etiam nec tortor id ", bold("magna"), " vulputate pretium.")
 			formatted = String.build {|io| format m, io, just_80}
 			formatted.should_be_justified(80)
 		end
-		it "can stretch plain paragraph to fill lines" do
+		it "stretches a plain paragraph to fill lines" do
 			m = Lipsum[0]
 			formatted = String.build {|io| format m, io, just_80}
 			formatted.should_be_justified(80)
 		end
-		it "can stretch marked-up paragraph to fill lines" do
+		it "stretches marked-up paragraph to fill lines" do
 			m = Lipsum[1]
 			formatted = String.build {|io| format m, io, just_80}
 			formatted.should_be_justified(80)
@@ -87,7 +89,9 @@ describe Diclionary::Text do
 			formatted = String.build {|io| format m, io, just_80}
 			formatted.should_be_justified(80)
 		end
-		it "can stretch text to various widths" do
+	end
+	context "when configured to justify to custom width" do
+		it "stretches text to configured width" do
 			# To 80 characters
 			just = just_80
 			formatted = String.build {|io| format Lipsum[1], io, just}
@@ -113,7 +117,9 @@ describe Diclionary::Text do
 			formatted = String.build {|io| format Lipsum[2], io, just}
 			formatted.should_be_justified(100)
 		end
-		it "can indent the first line of a paragraph" do
+	end
+	context "configured with first line indent" do
+		it "indents the first line of a paragraph" do
 			style = just_80
 			style.paragraph_indent = 4
 			formatted = String.build {|io| format Lipsum[1], io, style}
@@ -125,6 +131,8 @@ describe Diclionary::Text do
 				end
 			end
 		end
+	end
+	context "configured with margins" do
 		it "can print text with margins" do
 			style = just_80
 			style.paragraph_indent = 2
@@ -147,7 +155,9 @@ describe Diclionary::Text do
 				end
 			end
 		end
-		it "separates paragraphs from surrounding text by blank lines" do
+	end
+	context "given a paragraph" do
+		it "separates it from surrounding text by blank lines" do
 			style = TerminalStyle.new()
 			style.line_width = 40
 			m = markup("Line outside paragraph.",
@@ -169,7 +179,9 @@ describe Diclionary::Text do
 				EXPECTED
 				#-------------- 40 chars --------------#
 		end
-		it "prints ordered lists" do
+	end
+	context "given an ordered list" do
+		it "prints list items on new lines with indent" do
 			formatted = String.build {|io| format Lipsum[3], io, wrap_80}
 			formatted.should eq <<-EXPECTED
 				Donec sit amet facilisis lectus. Integer et fringilla velit. Sed aliquam eros ac
@@ -187,7 +199,7 @@ describe Diclionary::Text do
 				EXPECTED
 				#---------------------------------- 80 chars ----------------------------------#
 		end
-		it "prints ordered lists with configurable style" do
+		it "prints it with configurable style" do
 			style = TerminalStyle.new()
 			style.line_width = 60
 			style.list_indent = 6
