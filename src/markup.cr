@@ -39,6 +39,11 @@ module Diclionary::Text
 			end
 		end
 
+		def pretty_print(pp : PrettyPrint)
+			selfname = self.class.name.split("::").last
+			pp.list("#{selfname}{", children, "}")
+		end
+
 		def each
 			iter = HistIterator.new(([self] of Markup).each)
 			iters = Deque(HistIterator(Markup)).new
@@ -248,6 +253,10 @@ module Diclionary::Text
 
 		def inspect(io : IO)
 			io << @text
+		end
+
+		def pretty_print(pp : PrettyPrint)
+			pp.text @text
 		end
 	end
 
