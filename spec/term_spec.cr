@@ -274,6 +274,46 @@ describe "#format" do
 				EXPECTED
 				#-------------------------- 64 chars --------------------------#
 		end
+		context "configured with markers aligned right" do
+			it "wraps list items so they do not overflow into margins" do
+				style = TerminalStyle.new()
+				style.line_width = 40
+				style.list_indent = 8
+				style.list_marker_alignment = Alignment::Right
+				list = markup("x " * 24, ordered_list(
+					item("x " * 5), item("x " * 20)))
+				formatted = String.build {|io| format list, io, style}
+				formatted.should eq <<-EXPECTED
+					x x x x x x x x x x x x x x x x x x x x
+					x x x x
+					     1. x x x x x
+					     2. x x x x x x x x x x x x x x x x
+					        x x x x
+
+					EXPECTED
+					#-------------- 40 chars --------------#
+			end
+		end
+		context "configured with markers aligned left" do
+			it "wraps list items so they do not overflow into margins" do
+				style = TerminalStyle.new()
+				style.line_width = 40
+				style.list_indent = 8
+				style.list_marker_alignment = Alignment::Left
+				list = markup("x " * 24, ordered_list(
+					item("x " * 5), item("x " * 20)))
+				formatted = String.build {|io| format list, io, style}
+				formatted.should eq <<-EXPECTED
+					x x x x x x x x x x x x x x x x x x x x
+					x x x x
+					1.      x x x x x
+					2.      x x x x x x x x x x x x x x x x
+					        x x x x
+
+					EXPECTED
+					#-------------- 40 chars --------------#
+			end
+		end
 		# it "can stretch several paragraphs to fill lines" do
 		# 	formatted = String.build {|io| format Lipsum, io}
 		# 	formatted.should_be_justified(80)

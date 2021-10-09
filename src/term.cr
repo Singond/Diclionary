@@ -11,8 +11,15 @@ module Diclionary::Text
 		property left_margin = 0
 		property right_margin = 0
 		property list_indent = 4
+		property list_marker_alignment = Alignment::Right
 
 		DEFAULT = TerminalStyle.new
+	end
+
+	enum Alignment
+		Left
+		Center
+		Right
 	end
 
 	# Formats the given *text* for display in terminal.
@@ -100,7 +107,15 @@ module Diclionary::Text
 					n = numbering.pop + 1
 					numbering.push n
 					indent = style.list_indent * indentation_level
-					io << "#{n}. ".rjust(style.left_margin + indent)
+					io << " " * style.left_margin
+					case style.list_marker_alignment
+					in Alignment::Left
+						io << "#{n}. ".ljust(indent)
+					in Alignment::Center
+						io << "#{n}. ".center(indent)
+					in Alignment::Right
+						io << "#{n}. ".rjust(indent)
+					end
 					lw.next_left_skip = 0
 					lw.line_width = style.line_width -
 							(indent + style.left_margin + style.right_margin)
