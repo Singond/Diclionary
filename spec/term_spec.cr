@@ -133,7 +133,7 @@ describe "#format" do
 		end
 	end
 	context "configured with margins" do
-		it "can print text with margins" do
+		it "prints normal text with margins" do
 			style = just_80
 			style.paragraph_indent = 2
 			style.left_margin = 2
