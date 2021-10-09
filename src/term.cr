@@ -94,12 +94,13 @@ module Diclionary::Text
 					end
 					numbering.push 0
 					indentation_level += 1
-					lw.left_skip = style.list_indent * indentation_level
+					lw.left_skip = style.left_margin +
+							style.list_indent * indentation_level
 				when Item
 					n = numbering.pop + 1
 					numbering.push n
 					indent = style.list_indent * indentation_level
-					io << "#{n}. ".rjust(indent)
+					io << "#{n}. ".rjust(style.left_margin + indent)
 					lw.next_left_skip = 0
 					lw.line_width = style.line_width - indent
 				end
@@ -120,8 +121,8 @@ module Diclionary::Text
 					lw.flush unless lw.empty?
 					numbering.pop unless numbering.empty?
 					indentation_level -= 1
-					lw.next_left_skip = style.list_indent * indentation_level
-					lw.left_skip = style.list_indent * indentation_level
+					lw.left_skip = style.left_margin +
+							style.list_indent * indentation_level
 				when Item
 					lw.flush unless lw.empty?
 				end

@@ -225,6 +225,34 @@ describe "#format" do
 				EXPECTED
 				#------------------------ 60 chars ------------------------#
 		end
+		it "indents list items with 'list indent' in addition to margins" do
+			style = TerminalStyle.new()
+			style.line_width = 64
+			style.left_margin = 2
+			style.right_margin = 2
+			style.list_indent = 6
+			formatted = String.build {|io| format Lipsum[3], io, style}
+			formatted.should eq <<-EXPECTED
+				  Donec sit amet facilisis lectus. Integer et fringilla velit.
+				  Sed aliquam eros ac turpis tristique mollis. Maecenas luctus
+				  magna ac elit euismod fermentum.
+				     1. Curabitur pulvinar purus imperdiet purus fringilla,
+				        venenatis facilisis quam efficitur. Nunc justo diam,
+				        interdum ut varius a, laoreet ut justo.
+				     2. Sed rutrum pulvinar sapien eget feugiat.
+				     3. Nulla vulputate mollis nisl eu venenatis. Vestibulum
+				        consectetur lorem augue, sed dictum arcu vulputate
+				        quis. Phasellus a velit velit. Morbi auctor ante sit
+				        amet justo molestie interdum. Fusce sed condimentum
+				        neque, nec aliquam magna. Maecenas et mollis risus, in
+				        facilisis nisl.
+				  Proin elementum risus ut leo porttitor tristique. Sed sit
+				  amet tellus et velit luctus laoreet quis sed urna. Sed
+				  dictum fringilla nibh sit amet tempor.
+
+				EXPECTED
+				#-------------------------- 64 chars --------------------------#
+		end
 		# it "can stretch several paragraphs to fill lines" do
 		# 	formatted = String.build {|io| format Lipsum, io}
 		# 	formatted.should_be_justified(80)
