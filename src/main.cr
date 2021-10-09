@@ -29,6 +29,9 @@ module Diclionary
 		case entry
 		in TextEntry
 			style = TerminalStyle.new
+			style.left_margin = 2
+			style.right_margin = 2
+			style.list_marker_alignment = Alignment::Left
 			if width > 0
 				style.line_width = width
 				style.justify = justify
