@@ -260,14 +260,15 @@ describe "#format" do
 			style.right_margin = 2
 			style.list_indent = 6
 			list = markup("x " * 36, ordered_list(
-				item("x " * 40), item("x " * 40)))
+				item("x " * 40), item("x " * 5), item("x " * 40)))
 			formatted = String.build {|io| format list, io, style}
 			formatted.should eq <<-EXPECTED
 				  x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x
 				  x x x x x x
 				     1. x x x x x x x x x x x x x x x x x x x x x x x x x x x
 				        x x x x x x x x x x x x x
-				     2. x x x x x x x x x x x x x x x x x x x x x x x x x x x
+				     2. x x x x x
+				     3. x x x x x x x x x x x x x x x x x x x x x x x x x x x
 				        x x x x x x x x x x x x x
 
 				EXPECTED
