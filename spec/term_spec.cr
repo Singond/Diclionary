@@ -253,6 +253,26 @@ describe "#format" do
 				EXPECTED
 				#-------------------------- 64 chars --------------------------#
 		end
+		it "wraps list items so they do not overflow into margins" do
+			style = TerminalStyle.new()
+			style.line_width = 64
+			style.left_margin = 2
+			style.right_margin = 2
+			style.list_indent = 6
+			list = markup("x " * 36, ordered_list(
+				item("x " * 40), item("x " * 40)))
+			formatted = String.build {|io| format list, io, style}
+			formatted.should eq <<-EXPECTED
+				  x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x
+				  x x x x x x
+				     1. x x x x x x x x x x x x x x x x x x x x x x x x x x x
+				        x x x x x x x x x x x x x
+				     2. x x x x x x x x x x x x x x x x x x x x x x x x x x x
+				        x x x x x x x x x x x x x
+
+				EXPECTED
+				#-------------------------- 64 chars --------------------------#
+		end
 		# it "can stretch several paragraphs to fill lines" do
 		# 	formatted = String.build {|io| format Lipsum, io}
 		# 	formatted.should_be_justified(80)

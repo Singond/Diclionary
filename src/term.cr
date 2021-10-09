@@ -102,7 +102,8 @@ module Diclionary::Text
 					indent = style.list_indent * indentation_level
 					io << "#{n}. ".rjust(style.left_margin + indent)
 					lw.next_left_skip = 0
-					lw.line_width = style.line_width - indent
+					lw.line_width = style.line_width -
+							(indent + style.left_margin + style.right_margin)
 				end
 				pending_whitespace = "" if whitespace_written
 			else
