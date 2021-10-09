@@ -1,4 +1,5 @@
 require "./core.cr"
+require "./term.cr"
 require "./ssjc.cr"
 
 module Diclionary
@@ -27,13 +28,15 @@ module Diclionary
 
 		case entry
 		in TextEntry
+			style = TerminalStyle.new
 			if width > 0
-				format_text(STDOUT, entry.text, width: width,
-					justify: justify, rich: config.format != Format::PlainText)
+				style.line_width = width
+				style.justify = justify
 			else
 				# A dumb terminal
-				puts entry
+				style.line_width = 0
 			end
+			format entry.text, STDOUT, style
 		in StructuredEntry
 			puts entry
 		end

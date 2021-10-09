@@ -4,6 +4,8 @@ require "xml"
 
 require "./core.cr"
 
+include Diclionary::Text
+
 module Diclionary::Ujc
 	SSJC = SsjcDictionary.new("ssjc", "Slovník spisovného jazyka českého")
 
@@ -34,8 +36,10 @@ module Diclionary::Ujc
 					entries = [] of Entry
 				else
 					case format
-					in Format::PlainText, Format::RichText
+					in Format::PlainText
 						entry = parse_entry_plain(e)
+					in Format::RichText
+						entry = parse_entry_rich(e)
 					in Format::Structured
 						entry = parse_entry_structured(e)
 					end
@@ -47,23 +51,49 @@ module Diclionary::Ujc
 
 		def parse_entry_plain(nodeset : XML::NodeSet) : TextEntry
 			Log.debug {"Parsing #{nodeset.size} XML nodes as text entry"}
-			entry = TextEntry.new
+			entry_text = ""
 			nodeset.each do |node|
 				cls = (node["class"]? || "").split
 				text = node.content
-				fmt = FormattedString::Format.new
 				if cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
 					text = "\n" + text
 				end
-				if cls.includes?("it")
-					fmt.bold = true
-				end
-				if cls.includes?("np")
-					fmt.dim = true
-				end
-				entry.text << FormattedString.new(text, fmt)
+				entry_text += text
 			end
-			entry
+			TextEntry.new markup(entry_text)
+		end
+
+		def parse_entry_rich(nodeset : XML::NodeSet) : TextEntry
+			Log.debug {"Parsing #{nodeset.size} XML nodes as rich text entry"}
+			# parent = markup()
+			parents = Deque(Markup).new
+			parents.push(markup())
+			nodeset.each do |node|
+				cls = (node["class"]? || "").split
+				if cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
+					if node.content.strip.starts_with? "1"
+						list = OrderedList.new [] of Markup
+						parents.last.children << list
+						parents.push list
+					end
+					until parents.last.is_a? OrderedList
+						parents.pop
+					end
+					item = Item.new([] of Markup)
+					parents.last.children << item
+					parents.push item
+				else
+					elem = markup(node.content)
+					if cls.includes?("it")
+						elem = bold(elem)
+					end
+					if cls.includes?("np")
+						elem = small(elem)
+					end
+					parents.last.children << elem
+				end
+			end
+			TextEntry.new parents.first
 		end
 
 		def parse_entry_structured(nodeset : XML::NodeSet) : StructuredEntry
