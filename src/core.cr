@@ -6,7 +6,7 @@ require "./markup.cr"
 module Diclionary
 	extend self
 
-	VERSION = {{ read_file "version" }}
+	VERSION = {{ `shards version #{__DIR__}`.chomp.stringify }}
 
 	Log = ::Log.for("dicl")
 
