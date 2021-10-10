@@ -1,7 +1,7 @@
 require "colorize"
 require "log"
 
-require "./text.cr"
+require "./markup.cr"
 
 module Diclionary
 	extend self
@@ -35,16 +35,13 @@ module Diclionary
 	alias Entry = TextEntry | StructuredEntry
 
 	class TextEntry
-		property text : Array(FormattedString)
+		property text : Text::Markup
 
-		def initialize()
-			@text = [] of FormattedString
+		def initialize(@text = markup())
 		end
 
 		def to_s(io : IO)
-			@text.each do |t|
-				t.to_s(io)
-			end
+			@text.text
 		end
 	end
 
