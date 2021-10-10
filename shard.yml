@@ -1,0 +1,6 @@
+name: diclionary
+version: 0.1.0-alpha
+description: |
+  A command-line interface for viewing selected online dictionaries.
+authors:
+  - Jan Singon Slany <singond@seznam.cz>
