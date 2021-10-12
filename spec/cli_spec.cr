@@ -15,7 +15,7 @@ end
 
 describe "#run" do
 	context "without arguments" do
-		it "fails" do
+		it "fails and prints error" do
 			output, err, exit_code = run([] of String)
 			output.should be_empty
 			err.should_not be_empty
