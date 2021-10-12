@@ -58,11 +58,11 @@ module Diclionary::Cli
 		return {op || config, parser}
 	end
 
-	def run(args = ARGV) : ExitCode
+	def run(args = ARGV, stdout = STDOUT, stderr = STDERR) : ExitCode
 		begin
 			config, parser = parse_args(args)
 		rescue e : OptionParser::Exception
-			STDERR.puts e.message
+			stderr.puts e.message
 			return ExitCode::BadUsage
 		end
 
@@ -71,14 +71,14 @@ module Diclionary::Cli
 			puts VERSION
 			return ExitCode::Success
 		in Operation::Help
-			usage(STDOUT, parser)
+			usage(stdout, parser)
 			return ExitCode::Success
 		in Config
 			if config.terms.empty?
-				usage(STDERR, parser)
+				usage(stderr, parser)
 				return ExitCode::BadUsage
 			end
-			Diclionary.run(config)
+			Diclionary.run(config, stdout: stdout)
 		end
 	end
 end

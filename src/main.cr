@@ -17,11 +17,11 @@ module Diclionary
 		all
 	end
 
-	def print_entry(entry : Entry, config : Config)
+	def print_entry(entry : Entry, config : Config, io = STDOUT)
 		Colorize.on_tty_only!
 		justify = false
 		width = 0
-		if STDOUT.tty? && ENV["TERM"]? != "dumb"
+		if io.tty? && ENV["TERM"]? != "dumb"
 			justify = true
 			width = term_width
 		end
@@ -39,13 +39,14 @@ module Diclionary
 				# A dumb terminal
 				style.line_width = 0
 			end
-			format entry.text, STDOUT, style
+			format entry.text, io, style
 		in StructuredEntry
 			puts entry
 		end
 	end
 
-	def print_results(allresults : AllResults, config : Config) : Bool
+	def print_results(allresults : AllResults, config : Config,
+			stdout = STDOUT) : Bool
 		empty = true
 		# print_terms = config.terms.size > 1
 		allresults.each do |term, results|
@@ -55,7 +56,7 @@ module Diclionary
 			results.each do |result|
 				result.entries.each do |entry|
 					Log.debug {"Displaying entry for '#{term}'..."}
-					print_entry(entry, config)
+					print_entry(entry, config, io: stdout)
 					puts ""
 					empty = false
 				end
@@ -64,7 +65,7 @@ module Diclionary
 		empty
 	end
 
-	def run(config : Config) : ExitCode
+	def run(config : Config, stdout = STDOUT) : ExitCode
 		Log.level = config.log_level
 
 		# Handled separately in CLI, kept here for non-CLI usage
@@ -92,7 +93,7 @@ module Diclionary
 		s.times do
 			channel.receive
 		end
-		empty = print_results(results, config)
+		empty = print_results(results, config, stdout)
 		if empty
 			# No results found
 			return ExitCode::NoResult
