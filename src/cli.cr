@@ -68,7 +68,7 @@ module Diclionary::Cli
 
 		case config
 		in Operation::Version
-			puts VERSION
+			stdout.puts VERSION
 			return ExitCode::Success
 		in Operation::Help
 			usage(stdout, parser)
