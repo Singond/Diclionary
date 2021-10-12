@@ -1,4 +1,5 @@
 .atom/
+/lib/
 /pkg/
 
 *.tar.gz
