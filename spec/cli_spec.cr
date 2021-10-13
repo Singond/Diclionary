@@ -2,15 +2,28 @@ require "spec"
 
 require "../src/cli.cr"
 
-def run(args : Array(String))
-	stdout = String::Builder.new
-	stderr = String::Builder.new
+class Tty < String::Builder
+	def tty?
+		true
+	end
+end
+
+def run(args : Array(String), tty = true)
+	stdout : IO
+	stderr : IO
+	if tty
+		stdout = Tty.new
+		stderr = Tty.new
+	else
+		stdout = String::Builder.new
+		stderr = String::Builder.new
+	end
 	exit_code = Diclionary::Cli.run(args, stdout, stderr)
 	{stdout.to_s, stderr.to_s, exit_code}
 end
 
-def run(*args : String)
-	run(args.to_a)
+def run(*args : String, tty = true)
+	run(args.to_a, tty: tty)
 end
 
 describe "#run" do
