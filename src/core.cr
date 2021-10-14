@@ -26,6 +26,37 @@ module Diclionary
 		abstract def search(word : String, format : Format) : SearchResult
 	end
 
+	struct Language
+		property two_letter : String
+		property three_letter : String
+
+		def initialize(@two_letter, @three_letter = "")
+		end
+
+		def matches_code(code)
+			if code.size == 2
+				@two_letter == code
+			elsif code.size == 3
+				@three_letter == code
+			else
+				false
+			end
+		end
+
+		def to_s(io : IO)
+			unless @two_letter.empty?
+				io << @two_letter
+			else
+				io << @three_letter
+			end
+		end
+		def inspect(io : IO)
+			io << '"'
+			to_s io
+			io << '"'
+		end
+	end
+
 	enum Format
 		PlainText
 		RichText
