@@ -50,6 +50,7 @@ module Diclionary
 				io << @three_letter
 			end
 		end
+
 		def inspect(io : IO)
 			io << '"'
 			to_s io
@@ -69,6 +70,10 @@ module Diclionary
 		property text : Text::Markup
 
 		def initialize(@text = markup())
+		end
+
+		def initialize(string : String)
+			initialize(markup(string))
 		end
 
 		def to_s(io : IO)
@@ -127,10 +132,19 @@ module Diclionary
 		end
 	end
 
+	# Result of searching a single word in a single dictionary.
 	struct SearchResult
 		getter entries : Array(Entry)
 
 		def initialize(@entries : Array(Entry))
+		end
+
+		def initialize(*entries : Entry)
+			initialize(entries.to_a)
+		end
+
+		def initialize()
+			initialize([] of Entry)
 		end
 
 		def empty?()
