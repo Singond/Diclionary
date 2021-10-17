@@ -1,6 +1,7 @@
 require "spec"
 
 require "../src/cli.cr"
+require "./dictionaries.cr"
 
 class Tty < String::Builder
 	def tty?
@@ -26,6 +27,17 @@ def run(*args : String, tty = true)
 	run(args.to_a, tty: tty)
 end
 
+Dicts = [] of Diclionary::Dictionary
+module Diclionary
+	def init_dictionaries(config : Diclionary::Config) : Array(Diclionary::Dictionary)
+		Dicts
+	end
+end
+
+Spec.before_each do
+	Dicts.clear
+end
+
 describe "#run" do
 	context "without arguments" do
 		it "fails and prints error" do
@@ -49,6 +61,15 @@ describe "#run" do
 			output.should match /Usage: dicl .*/
 			err.should be_empty
 			exit_code.should eq Diclionary::ExitCode::Success
+		end
+	end
+	context "ten" do
+		it "searches the word 'ten' in all available dictionaries" do
+			Dicts << Cs1
+			Dicts << En1
+			o, e, c = run("ten")
+			o.includes?("ukazovací zájmeno").should be_true
+			o.includes?("the numeral 10").should be_true
 		end
 	end
 end
