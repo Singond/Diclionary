@@ -41,7 +41,7 @@ module Diclionary
 			end
 			format entry.text, io, style
 		in StructuredEntry
-			puts entry
+			io.puts entry
 		end
 	end
 
@@ -57,7 +57,7 @@ module Diclionary
 				result.entries.each do |entry|
 					Log.debug {"Displaying entry for '#{term}'..."}
 					print_entry(entry, config, io: stdout)
-					puts ""
+					stdout.puts ""
 					empty = false
 				end
 			end
