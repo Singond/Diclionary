@@ -19,3 +19,4 @@ Cs1.entries["ten"] = TextEntry.new("ukazovací zájmeno")
 
 En1 = FakeDictionary.new("ted", "Testford English Dictionary")
 En1.entries["ten"] = TextEntry.new("the numeral 10")
+En1.entries["tea"] = TextEntry.new("a drink")

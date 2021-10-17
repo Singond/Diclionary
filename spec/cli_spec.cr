@@ -72,4 +72,18 @@ describe "#run" do
 			o.includes?("the numeral 10").should be_true
 		end
 	end
+	context "ten, tea" do
+		it "prints individual entries separated by a blank line" do
+			Dicts << Cs1
+			Dicts << En1
+			o, e, c = run("ten", "tea")
+			o.should eq <<-EXPECTED + "\n"
+			  ukazovací zájmeno
+
+			  the numeral 10
+
+			  a drink
+			EXPECTED
+		end
+	end
 end

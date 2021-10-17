@@ -49,15 +49,17 @@ module Diclionary
 			stdout = STDOUT) : Bool
 		empty = true
 		# print_terms = config.terms.size > 1
-		allresults.each do |term, results|
+		allresults.each_with_index do |(term, results), i|
 			# if print_terms
 			# 	STDOUT << "[" << term.colorize.bold << "]\n"
 			# end
-			results.each do |result|
+			results.each_with_index do |result, j|
 				result.entries.each do |entry|
 					Log.debug {"Displaying entry for '#{term}'..."}
 					print_entry(entry, config, io: stdout)
-					stdout.puts ""
+					unless i == allresults.size - 1 && j == results.size - 1
+						stdout.puts ""
+					end
 					empty = false
 				end
 			end
