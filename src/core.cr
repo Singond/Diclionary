@@ -19,7 +19,10 @@ module Diclionary
 
 	# A connector to a dictionary.
 	abstract struct Dictionary
-		def initialize(@name : String = "", @title : String = "")
+		@name : String
+		@title : String
+
+		def initialize(@name = "", @title = "")
 		end
 
 		# Searches *word* in the dictionary and returns the result.
