@@ -101,4 +101,14 @@ describe "#run" do
 			EXPECTED
 		end
 	end
+	context "ten --language for a known language without dictionary" do
+		it "does not block indefinitely" do
+			o, e, c = run("ten", "--language=de")
+		end
+		it "fails" do
+			o, e, c = run("ten", "--language=de")
+			o.should be_empty
+			c.should_not eq Diclionary::ExitCode::Success
+		end
+	end
 end

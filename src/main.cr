@@ -89,9 +89,11 @@ module Diclionary
 		results = AllResults.new(
 			[] of SearchResult, config.terms.size)
 		channel = Channel(Nil).new
+		fibers = 0
 		dictionaries.each do |d|
 			config.terms.each do |word|
 				results[word] = [] of SearchResult
+				fibers += 1
 				spawn do
 					Log.debug {"Searching for '#{word}'."}
 					results[word] << d.search(word, config.format)
@@ -99,8 +101,7 @@ module Diclionary
 				end
 			end
 		end
-		s = config.terms.size
-		s.times do
+		fibers.times do
 			channel.receive
 		end
 		empty = print_results(results, config, stdout)
