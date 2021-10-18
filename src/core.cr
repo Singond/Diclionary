@@ -21,6 +21,7 @@ module Diclionary
 	abstract struct Dictionary
 		@name : String
 		@title : String
+		getter search_languages : Array(Language) = [] of Language
 
 		def initialize(@name = "", @title = "")
 		end
@@ -161,5 +162,6 @@ module Diclionary
 		property log_level : ::Log::Severity = ::Log::Severity::Notice
 		property terms = [] of String
 		property format : Format = Format::RichText
+		property search_lang : Language?
 	end
 end

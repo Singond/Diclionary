@@ -17,6 +17,12 @@ module Diclionary
 		all
 	end
 
+	def is_applicable?(dict : Dictionary, c : Config) : Bool
+		l = c.search_lang
+		return false if l && !dict.search_languages.includes?(l)
+		return true
+	end
+
 	def print_entry(entry : Entry, config : Config, io = STDOUT)
 		Colorize.on_tty_only!
 		justify = false
@@ -76,7 +82,9 @@ module Diclionary
 			return ExitCode::BadUsage
 		end
 
-		dictionaries = init_dictionaries(config)
+		dictionaries = init_dictionaries(config).select do |dict|
+			is_applicable?(dict, config)
+		end
 
 		results = AllResults.new(
 			[] of SearchResult, config.terms.size)

@@ -86,4 +86,24 @@ describe "#run" do
 			EXPECTED
 		end
 	end
+	context "ten --language=cs" do
+		it "searches the meaning of the Czech word 'ten'" do
+			Dicts << Cs1
+			Dicts << En1
+			o, e, c = run("ten", "--language=cs")
+			o.should eq <<-EXPECTED + "\n"
+			  ukazovací zájmeno
+			EXPECTED
+		end
+	end
+	context "ten --language=en" do
+		it "searches the meaning of the English word 'ten'" do
+			Dicts << Cs1
+			Dicts << En1
+			o, e, c = run("ten", "--language=en")
+			o.should eq <<-EXPECTED + "\n"
+			  the numeral 10
+			EXPECTED
+		end
+	end
 end

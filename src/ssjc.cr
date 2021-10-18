@@ -3,6 +3,7 @@ require "uri"
 require "xml"
 
 require "./core.cr"
+require "./languages.cr"
 
 include Diclionary::Text
 
@@ -15,6 +16,7 @@ module Diclionary::Ujc
 
 		def initialize(*args)
 			super("ssjc", "Slovník spisovného jazyka českého")
+			@search_languages = [Language::Czech]
 		end
 
 		def search(word : String, format : Format) : SearchResult

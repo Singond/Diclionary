@@ -46,6 +46,10 @@ module Diclionary::Cli
 			p.on "--structured", "Output in structured format" do
 				config.format = Format::Structured
 			end
+			p.on "-l LANG", "--language=LANG",
+					"Search entries in LANG" do |lang|
+				config.search_lang = Language.from_code lang
+			end
 		end
 		parser.unknown_args do |args|
 			if args.size > 0
