@@ -34,11 +34,14 @@ module Diclionary
 	end
 end
 
-Spec.before_each do
-	Dicts.clear
-end
 
 describe "#run" do
+	before_each do
+		Dicts.clear
+		Dicts << Cs1
+		Dicts << En1
+	end
+
 	context "without arguments" do
 		it "fails and prints error" do
 			output, err, exit_code = run([] of String)
@@ -65,8 +68,6 @@ describe "#run" do
 	end
 	context "ten" do
 		it "searches the word 'ten' in all available dictionaries" do
-			Dicts << Cs1
-			Dicts << En1
 			o, e, c = run("ten")
 			o.includes?("ukazovací zájmeno").should be_true
 			o.includes?("the numeral 10").should be_true
@@ -74,8 +75,6 @@ describe "#run" do
 	end
 	context "ten, tea" do
 		it "prints individual entries separated by a blank line" do
-			Dicts << Cs1
-			Dicts << En1
 			o, e, c = run("ten", "tea")
 			o.should eq <<-EXPECTED + "\n"
 			  ukazovací zájmeno
@@ -88,8 +87,6 @@ describe "#run" do
 	end
 	context "ten --language=cs" do
 		it "searches the meaning of the Czech word 'ten'" do
-			Dicts << Cs1
-			Dicts << En1
 			o, e, c = run("ten", "--language=cs")
 			o.should eq <<-EXPECTED + "\n"
 			  ukazovací zájmeno
@@ -98,8 +95,6 @@ describe "#run" do
 	end
 	context "ten --language=en" do
 		it "searches the meaning of the English word 'ten'" do
-			Dicts << Cs1
-			Dicts << En1
 			o, e, c = run("ten", "--language=en")
 			o.should eq <<-EXPECTED + "\n"
 			  the numeral 10
