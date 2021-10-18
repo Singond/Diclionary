@@ -7,10 +7,15 @@ require "./core.cr"
 include Diclionary::Text
 
 module Diclionary::Ujc
-	SSJC = SsjcDictionary.new("ssjc", "Slovník spisovného jazyka českého")
+	SSJC = SsjcDictionary::INSTANCE
 
 	struct SsjcDictionary < Dictionary
+		INSTANCE = new
 		URL = URI.new("https", "ssjc.ujc.cas.cz")
+
+		def initialize(*args)
+			super("ssjc", "Slovník spisovného jazyka českého")
+		end
 
 		def search(word : String, format : Format) : SearchResult
 			params = {"heslo" => word, "hsubstr" => "no", "where" => "hesla"}
