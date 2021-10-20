@@ -113,4 +113,12 @@ describe "#run" do
 			c.should_not eq Diclionary::ExitCode::Success
 		end
 	end
+	context "ten --language with an unknown language" do
+		it "fails with an error message" do
+			o, e, c = run("ten", "--language=xx")
+			o.should be_empty
+			e.should match /Unknown language: xx/
+			c.should eq Diclionary::ExitCode::BadUsage
+		end
+	end
 end

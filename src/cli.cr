@@ -45,8 +45,15 @@ module Diclionary::Cli
 				config.format = Format::Structured
 			end
 			p.on "-l LANG", "--language=LANG",
-					"Search entries in LANG" do |lang|
-				config.search_lang = Language.from_code lang
+					"Search entries in LANG" do |lang_code|
+				Log.debug {"Setting search language to #{lang_code}."}
+				lang = Language.from_code lang_code
+				if lang
+					config.search_lang = lang
+				else
+					Log.error {"Unknown language: #{lang_code}."}
+					exit_code = ExitCode::BadUsage
+				end
 			end
 		end
 		parser.unknown_args do |args|
