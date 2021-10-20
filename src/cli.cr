@@ -12,15 +12,11 @@ module Diclionary::Cli
 		io << "\n"
 	end
 
-	private enum Operation
-		Version
-		Help
-	end
-
 	private def parse_args(args, stdout = STDOUT, stderr = STDERR) \
-			: {Config | Operation, OptionParser}
+			: {Config | ExitCode, OptionParser}
+		Log.debug {"Parsing args"}
 		config = Config.new
-		operation = nil
+		exit_code = nil
 		parser = OptionParser.new do |p|
 			p.banner = <<-BANNER
 			Usage: dicl [OPTIONS] WORD...
@@ -28,10 +24,12 @@ module Diclionary::Cli
 			Options:
 			BANNER
 			p.on "--version", "Show version number and exit" do
-				operation = Operation::Version
+				stdout.puts VERSION
+				exit_code = ExitCode::Success
 			end
 			p.on "-h", "--help", "Print usage and exit" do
-				operation = Operation::Help
+				usage(stdout, p)
+				exit_code = ExitCode::Success
 			end
 			p.on "-v", "--verbose", "Increase verbosity" do
 				# Decrease logging level, if possible.
@@ -58,25 +56,21 @@ module Diclionary::Cli
 		end
 		parser.parse args
 
-		op = operation
-		return {op || config, parser}
+		e = exit_code
+		return {e || config, parser}
 	end
 
 	def run(args = ARGV, stdout = STDOUT, stderr = STDERR) : ExitCode
 		begin
-			config, parser = parse_args(args)
+			config, parser = parse_args(args, stdout, stderr)
 		rescue e : OptionParser::Exception
 			stderr.puts e.message
 			return ExitCode::BadUsage
 		end
 
 		case config
-		in Operation::Version
-			stdout.puts VERSION
-			return ExitCode::Success
-		in Operation::Help
-			usage(stdout, parser)
-			return ExitCode::Success
+		in ExitCode
+			return config
 		in Config
 			if config.terms.empty?
 				usage(stderr, parser)
