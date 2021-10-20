@@ -110,7 +110,8 @@ describe "#run" do
 		it "fails" do
 			o, e, c = run("ten", "--language=de")
 			o.should be_empty
-			c.should_not eq Diclionary::ExitCode::Success
+			e.should match /No dictionaries match/
+			c.should eq Diclionary::ExitCode::BadConfig
 		end
 	end
 	context "ten --language with an unknown language" do

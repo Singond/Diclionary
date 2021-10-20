@@ -14,6 +14,7 @@ module Diclionary
 		Success = 0
 		NoResult = 1
 		BadUsage = 2
+		BadConfig = 3
 		Other = 10
 	end
 

@@ -82,8 +82,13 @@ module Diclionary
 			return ExitCode::BadUsage
 		end
 
-		dictionaries = init_dictionaries(config).select do |dict|
+		all_dictionaries = init_dictionaries(config)
+		dictionaries = all_dictionaries.select do |dict|
 			is_applicable?(dict, config)
+		end
+		if all_dictionaries.size > 0 && dictionaries.size == 0
+			Log.error {"No dictionaries match the search criteria."}
+			return ExitCode::BadConfig
 		end
 
 		results = AllResults.new(
