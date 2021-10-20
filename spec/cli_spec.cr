@@ -9,6 +9,7 @@ class Tty < String::Builder
 	end
 end
 
+Log.define_formatter Fmt, "#{message}"
 def run(args : Array(String), tty = true)
 	stdout : IO
 	stderr : IO
@@ -19,6 +20,8 @@ def run(args : Array(String), tty = true)
 		stdout = String::Builder.new
 		stderr = String::Builder.new
 	end
+	log_backend = Log::IOBackend.new(io: stderr, formatter: Fmt, dispatcher: :sync)
+	Log.setup("*", :warn, log_backend)
 	exit_code = Diclionary::Cli.run(args, stdout, stderr)
 	{stdout.to_s, stderr.to_s, exit_code}
 end
@@ -33,7 +36,6 @@ module Diclionary
 		Dicts
 	end
 end
-
 
 describe "#run" do
 	before_each do
