@@ -87,6 +87,22 @@ describe "#run" do
 			EXPECTED
 		end
 	end
+	context "ten --dictionary=zsjc" do
+		it "searches the meaning  only in the 'zsjc' dictionary" do
+			o, e, c = run("ten", "--dictionary=zsjc")
+			o.should eq <<-EXPECTED + "\n"
+			  ukazovací zájmeno
+			EXPECTED
+		end
+	end
+	context "ten --dictionary=ted" do
+		it "searches the meaning  only in the 'ted' dictionary" do
+			o, e, c = run("ten", "--dictionary=ted")
+			o.should eq <<-EXPECTED + "\n"
+			  the numeral 10
+			EXPECTED
+		end
+	end
 	context "ten --language=cs" do
 		it "searches the meaning of the Czech word 'ten'" do
 			o, e, c = run("ten", "--language=cs")

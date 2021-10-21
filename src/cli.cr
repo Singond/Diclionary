@@ -44,6 +44,11 @@ module Diclionary::Cli
 			p.on "--structured", "Output in structured format" do
 				config.format = Format::Structured
 			end
+			p.on "-d DICT", "--dictionary=DICT",
+					"Search in dictionary DICT" do |dict_name|
+				Log.debug {"Setting dictionary to #{dict_name}."}
+				config.dictionary = dict_name
+			end
 			p.on "-l LANG", "--language=LANG",
 					"Search entries in LANG" do |lang_code|
 				Log.debug {"Setting search language to #{lang_code}."}

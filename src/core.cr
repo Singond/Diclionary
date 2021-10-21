@@ -20,8 +20,8 @@ module Diclionary
 
 	# A connector to a dictionary.
 	abstract struct Dictionary
-		@name : String
-		@title : String
+		getter name : String
+		getter title : String
 		getter search_languages : Array(Language) = [] of Language
 
 		def initialize(@name = "", @title = "")
@@ -163,6 +163,7 @@ module Diclionary
 		property log_level : ::Log::Severity = ::Log::Severity::Notice
 		property terms = [] of String
 		property format : Format = Format::RichText
+		property dictionary : String?
 		property search_lang : Language?
 	end
 end

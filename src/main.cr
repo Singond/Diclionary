@@ -17,8 +17,9 @@ module Diclionary
 		all
 	end
 
-	def is_applicable?(dict : Dictionary, c : Config) : Bool
-		l = c.search_lang
+	def is_applicable?(dict : Dictionary, cfg : Config) : Bool
+		return false if cfg.dictionary && dict.name != cfg.dictionary
+		l = cfg.search_lang
 		return false if l && !dict.search_languages.includes?(l)
 		return true
 	end
