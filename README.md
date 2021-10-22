@@ -23,6 +23,20 @@ sudo apt update
 sudo apt install diclionary
 ```
 
+Arch
+----
+Add this to your `/etc/pacman.conf`:
+```
+[home_singon_diclionary_Arch]
+SigLevel = Never
+Server = https://download.opensuse.org/repositories/home:/singon:/diclionary/Arch/$arch
+```
+Then update the package database and install `diclionary`:
+```sh
+sudo pacman -Syyu
+sudo pacman -S diclionary
+```
+
 From Source
 -----------
 You need to have the Crystal compiler available on your system.
