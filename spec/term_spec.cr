@@ -294,6 +294,38 @@ describe "#format" do
 					#-------------- 40 chars --------------#
 			end
 		end
+		context "with many items" do
+			it "keeps items with longer label aligned" do
+				m = ordered_list(
+				item("Nulla"),
+				item("vulputate"),
+				item("mollis"),
+				item("nisl"),
+				item("eu"),
+				item("venenatis"),
+				item("vestibulum"),
+				item("consectetur"),
+				item("lorem"),
+				item("augue"),
+				item("sed"),
+				item("dictum"))
+				formatted = String.build {|io| format m, io, wrap_80}
+				formatted.should eq <<-EXPECTED + "\n"
+					 1. Nulla
+					 2. vulputate
+					 3. mollis
+					 4. nisl
+					 5. eu
+					 6. venenatis
+					 7. vestibulum
+					 8. consectetur
+					 9. lorem
+					10. augue
+					11. sed
+					12. dictum
+					EXPECTED
+			end
+		end
 		context "configured with markers aligned left" do
 			it "wraps list items so they do not overflow into margins" do
 				style = TerminalStyle.new()
