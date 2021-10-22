@@ -78,7 +78,7 @@ module Diclionary::Ujc
 			nodeset.each do |node|
 				cls = (node["class"]? || "").split
 				if cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
-					if node.content.strip.starts_with? "1"
+					if node.content.strip == "1."
 						list = OrderedList.new [] of Markup
 						parents.last.children << list
 						parents.push list
