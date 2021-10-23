@@ -1,19 +1,18 @@
 PREFIX ?= /usr/local
-all != git ls-files
-SRC != find src -type f
-INST = dicl
-version != cat version
-versionnum != grep -Eo '[0-9.]+' version
+all_files != git ls-files
+src_files != find src -type f
+installables = dicl
+version != grep "version:" shard.yml | cut -d " " -f2
 distbase = diclionary-$(version)
 distfile = $(distbase).tar.gz
 
-all: $(INST)
+all: $(installables)
 
-dicl: $(SRC)
+dicl: $(src_files)
 	crystal build --release src/dicl.cr
 
 .PHONY: install
-install: $(INST)
+install: $(installables)
 	@echo "Installing $(DESTDIR)$(PREFIX)/bin/dicl"
 	install -d $(DESTDIR)$(PREFIX)/bin/
 	install -m 755 dicl $(DESTDIR)$(PREFIX)/bin/
@@ -26,5 +25,5 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/share/man/man1/dicl.1
 
 dist: $(distfile)
-$(distfile): $(all)
+$(distfile): $(all_files)
 	git archive --prefix $(distbase)/ -o $@ HEAD
