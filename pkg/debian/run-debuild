@@ -1,0 +1,40 @@
+#!/bin/bash
+set -e
+
+mount=/package
+build=/package-build
+
+if [[ ! -d $mount ]]; then
+	echo "run-debuild: Nothing mounted in ${mount}." 2>&1
+	exit 2
+fi
+
+orig="$(find $mount -type f -name '*.orig.tar.gz' -printf %P)"
+basename="$(basename -s '.orig.tar.gz' $mount/$orig)"
+pkgname="${basename%_*}"
+pkgver="${basename##*_}"
+pkgdir="${pkgname}-${pkgver}"
+
+# Extract the source tarball
+echo "run-debuild: Extracting source tarball into ${pkgdir}..."
+mkdir -p "$build/$pkgdir"
+cd "$build/$pkgdir"
+cp "$mount/$orig" ..
+tar xf "../$orig" --strip-components=1
+
+# Copy in the debian files
+echo "run-debuild: Copying Debian files into ${pkgdir}..."
+cp -r "$mount/debian" .
+
+# Install build dependencies
+echo "run-debuild: Installing build dependencies..."
+mk-build-deps --install --remove debian/control
+
+# Build the package
+echo "run-debuild: Building the package..."
+debuild "$@"
+
+# Copy the build results back to the mount directory
+echo "run-debuild: Copying built files..."
+mkdir -p /package/build
+rsync -r "$build/" /package/build
