@@ -11,6 +11,10 @@ all: $(installables)
 dicl: $(src_files)
 	crystal build --release src/dicl.cr
 
+.PHONY: check
+check: $(src_files)
+	crystal spec
+
 .PHONY: install
 install: $(installables)
 	@echo "Installing $(DESTDIR)$(PREFIX)/bin/dicl"
