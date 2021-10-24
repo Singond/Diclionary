@@ -66,6 +66,7 @@ describe Markup do
 		end
 		it "prints the text with ANSI escape codes" do
 			m = markup("A text with a ", bold("bold"), " word")
+			Colorize.enabled = true
 			m.to_ansi.should eq "A text with a \e[1mbold\e[0m word"
 			markup("A text with a ", bold("bold"), " and ",
 				small("faint"), " word").to_ansi
