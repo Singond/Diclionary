@@ -1,7 +1,7 @@
 Source: diclionary
 Section: misc
 Priority: optional
-Maintainer: singon <singond@seznam.cz>
+Maintainer: Jan Singon Slany <singond@seznam.cz>
 Standards-Version: 4.5.0
 Build-Depends: debhelper (>= 9), crystal, libxml2-dev, libssl-dev
 
