@@ -9,7 +9,7 @@ if [[ ! -d $mount ]]; then
 	exit 2
 fi
 
-orig="$(find $mount -type f -name '*.orig.tar.gz' -printf %P)"
+orig="$(find $mount -maxdepth 1 -type f -name '*.orig.tar.gz' -printf %P)"
 basename="$(basename -s '.orig.tar.gz' $mount/$orig)"
 pkgname="${basename%_*}"
 pkgver="${basename##*_}"
