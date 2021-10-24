@@ -68,6 +68,14 @@ describe "#run" do
 			exit_code.should eq Diclionary::ExitCode::Success
 		end
 	end
+	context "when searching a word not existing in any dictionary" do
+		it "exits with error code" do
+			o, e, c = run("xxxxxx")
+			o.should be_empty
+			e.should be_empty
+			c.should eq Diclionary::ExitCode::NoResult
+		end
+	end
 	context "ten" do
 		it "searches the word 'ten' in all available dictionaries" do
 			o, e, c = run("ten")

@@ -54,7 +54,7 @@ module Diclionary
 
 	def print_results(allresults : AllResults, config : Config,
 			stdout = STDOUT) : Bool
-		empty = true
+		did_print = false
 		# print_terms = config.terms.size > 1
 		allresults.each_with_index do |(term, results), i|
 			# if print_terms
@@ -67,11 +67,11 @@ module Diclionary
 					unless i == allresults.size - 1 && j == results.size - 1
 						stdout.puts ""
 					end
-					empty = false
+					did_print = true
 				end
 			end
 		end
-		empty
+		did_print
 	end
 
 	def run(config : Config, stdout = STDOUT) : ExitCode
@@ -110,8 +110,7 @@ module Diclionary
 		fibers.times do
 			channel.receive
 		end
-		empty = print_results(results, config, stdout)
-		if empty
+		unless print_results(results, config, stdout)
 			# No results found
 			return ExitCode::NoResult
 		end
