@@ -1,0 +1,16 @@
+Source: diclionary
+Section: misc
+Priority: optional
+Maintainer: singon <singond@seznam.cz>
+Standards-Version: 4.5.0
+Build-Depends: debhelper (>= 9), crystal, libxml2-dev, libssl-dev
+
+Package: diclionary
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Command-line interface for online dictionaries
+ Diclionary provides access to selected online dictionaries
+ directly from the terminal.
+ .
+ For more information on, see:
+ https://github.com/Singond/Diclionary
