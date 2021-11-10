@@ -27,6 +27,7 @@ echo "run-debuild: Copying Debian files into ${pkgdir}..."
 cp -r "$mount/debian" .
 
 # Install build dependencies
+apt update
 echo "run-debuild: Installing build dependencies..."
 mk-build-deps --install --remove debian/control
 
