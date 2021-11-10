@@ -1,3 +1,9 @@
+diclionary (0.1.0-2) focal; urgency=medium
+
+  * Fix OBS package
+
+ -- Singon <singond@seznam.cz>  Wed, 10 Nov 2021 20:09:37 +0100
+
 diclionary (0.1.0-1) focal; urgency=low
 
   * Initial release
