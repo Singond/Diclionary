@@ -79,9 +79,14 @@ module Diclionary::Ujc
 			nodeset.each do |node|
 				cls = (node["class"]? || "").split
 				if cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
+					item_prefix: String?
 					# If the delimiter looks like a first item, start a new list.
-					if node.content.strip.match FIRST_ITEM_REGEX
-						# TODO: If the item has a non-numeric prefix, put it somewhere.
+					if match = node.content.strip.match FIRST_ITEM_REGEX
+						# If the item has a non-numeric prefix,
+						# store it away for later insertion
+						# (there is no way to put it directly
+						# into the item marker).
+						item_prefix = match[1]?
 						list = OrderedList.new [] of Markup
 						parents.last.children << list
 						parents.push list
@@ -93,6 +98,12 @@ module Diclionary::Ujc
 							parents.pop
 						end
 						item = Item.new([] of Markup)
+						if item_prefix
+							# Insert the item prefix here
+							item.children << bold(item_prefix)
+							item.children << markup(" ")
+							item_prefix = nil
+						end
 						parents.last.children << item
 						parents.push item
 					end
