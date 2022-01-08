@@ -13,6 +13,7 @@ module Diclionary::Ujc
 	struct SsjcDictionary < Dictionary
 		INSTANCE = new
 		URL = URI.new("https", "ssjc.ujc.cas.cz")
+		FIRST_ITEM_REGEX = /([^0-9]*)1.$/
 
 		def initialize(*args)
 			super("ssjc", "Slovník spisovného jazyka českého")
@@ -78,17 +79,23 @@ module Diclionary::Ujc
 			nodeset.each do |node|
 				cls = (node["class"]? || "").split
 				if cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
-					if node.content.strip == "1."
+					# If the delimiter looks like a first item, start a new list.
+					if node.content.strip.match FIRST_ITEM_REGEX
+						# TODO: If the item has a non-numeric prefix, put it somewhere.
 						list = OrderedList.new [] of Markup
 						parents.last.children << list
 						parents.push list
 					end
-					until parents.last.is_a? OrderedList
-						parents.pop
+					# Return to the innermost list (if any)
+					# and start next item underneath.
+					if parents.any? {|e| e.is_a? OrderedList}
+						until parents.last.is_a? OrderedList
+							parents.pop
+						end
+						item = Item.new([] of Markup)
+						parents.last.children << item
+						parents.push item
 					end
-					item = Item.new([] of Markup)
-					parents.last.children << item
-					parents.push item
 				else
 					elem = markup(node.content)
 					if cls.includes?("it")
