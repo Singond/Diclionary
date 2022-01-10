@@ -101,9 +101,14 @@ module Diclionary
 				results[word] = [] of SearchResult
 				fibers += 1
 				spawn do
-					Log.debug {"Searching for '#{word}'."}
-					results[word] << d.search(word, config.format)
-					channel.send(nil)
+					begin
+						Log.debug {"Searching for '#{word}'."}
+						results[word] << d.search(word, config.format)
+						channel.send(nil)
+					rescue ex
+						stderr.puts ex.message
+						channel.send(nil)
+					end
 				end
 			end
 		end
