@@ -88,7 +88,7 @@ module Diclionary::Cli
 				usage(stderr, parser)
 				return ExitCode::BadUsage
 			end
-			Diclionary.run(config, stdout: stdout)
+			Diclionary.run(config, stdout: stdout, stderr: stderr)
 		end
 	end
 end

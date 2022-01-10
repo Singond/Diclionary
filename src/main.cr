@@ -74,7 +74,7 @@ module Diclionary
 		did_print
 	end
 
-	def run(config : Config, stdout = STDOUT) : ExitCode
+	def run(config : Config, stdout = STDOUT, stderr = STDERR) : ExitCode
 		Log.level = config.log_level
 
 		# Handled separately in CLI, kept here for non-CLI usage
