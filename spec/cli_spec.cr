@@ -1,7 +1,6 @@
-require "spec"
-
 require "../src/cli.cr"
 require "./dictionaries.cr"
+require "./spec_helper.cr"
 
 class Tty < String::Builder
 	def tty?
@@ -30,18 +29,9 @@ def run(*args : String, tty = true)
 	run(args.to_a, tty: tty)
 end
 
-Dicts = [] of Diclionary::Dictionary
-module Diclionary
-	def init_dictionaries(config : Diclionary::Config) : Array(Diclionary::Dictionary)
-		Dicts
-	end
-end
-
 describe "#run" do
 	before_each do
-		Dicts.clear
-		Dicts << Cs1
-		Dicts << En1
+		Diclionary.dictionaries = [Cs1, En1]
 	end
 
 	context "without arguments" do
