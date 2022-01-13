@@ -86,7 +86,10 @@ module Diclionary::Ujc
 						# store it away for later insertion
 						# (there is no way to put it directly
 						# into the item marker).
-						item_prefix = match[1]?
+						prefix = match[1]?
+						if prefix && !prefix.empty?
+							item_prefix = prefix
+						end
 						list = OrderedList.new [] of Markup
 						parents.last.children << list
 						parents.push list
