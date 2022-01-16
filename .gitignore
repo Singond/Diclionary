@@ -1,8 +1,9 @@
-.atom/
-*.geany
 /lib/
 /pkg/
-.project
-
 *.tar.gz
 /dicl
+
+.atom/
+.vscode/
+*.geany
+.project
