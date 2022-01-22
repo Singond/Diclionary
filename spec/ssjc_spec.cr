@@ -27,7 +27,7 @@ def printed(entry : TextEntry) : String
 	output.to_s.chomp('\n')
 end
 
-describe SsjcDictionary do
+describe SsjcDictionary, tags: "online" do
 	it do
 		text = text_entry("hnidopich", Format::RichText).text
 		list = text.find {|e, start| e.is_a? OrderedList}
