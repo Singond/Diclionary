@@ -6,6 +6,9 @@ Changelog
 ### Added
 - This changelog.
 
+### Changed
+- Improved parsing of entries in `ssjc` containing multiple headwords.
+
 ### Fixed
 - Fixed a bug causing the program to crash on entries in the `ssjc` dictionary
   where the label of the first item in a numbered list was not equal to `1.`,

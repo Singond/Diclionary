@@ -73,10 +73,13 @@ module Diclionary::Ujc
 
 		def parse_entry_rich(nodeset : XML::NodeSet) : TextEntry
 			Log.debug {"Parsing #{nodeset.size} XML nodes as rich text entry"}
-			# parent = markup()
 			parents = Deque(Markup).new
-			parents.push(markup())
-			nodeset.each do |node|
+			par = Paragraph.new [] of Markup
+			root = markup(par)
+			parents.push(root)
+			parents.push(par)
+			node = nodeset[0]
+			loop do
 				cls = (node["class"]? || "").split
 				if cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
 					item_prefix: String?
@@ -110,6 +113,21 @@ module Diclionary::Ujc
 						parents.last.children << item
 						parents.push item
 					end
+				elsif (cls.includes?("delim") && cls.includes?("bo") \
+							&& node.content =~ /\x{2014}|\x{2192}(.*)/) \
+						|| node.content =~ /\x{25CB}(.*)/
+						#&& (match = node.content.match SUBHEADWORD_REGEX)
+					until parents.last.is_a? Paragraph
+						parents.pop
+					end
+					parents.pop
+					par = Paragraph.new([] of Markup)
+					suffix = $~[1]?
+					if suffix && !suffix.blank?
+						par.children << markup(suffix.strip + " ")
+					end
+					parents.last.children << par
+					parents.push par
 				else
 					elem = markup(node.content)
 					if cls.includes?("it")
@@ -120,6 +138,7 @@ module Diclionary::Ujc
 					end
 					parents.last.children << elem
 				end
+				break unless node = node.next
 			end
 			TextEntry.new parents.first
 		end
