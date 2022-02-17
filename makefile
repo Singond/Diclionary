@@ -13,7 +13,7 @@ dicl: $(src_files)
 
 .PHONY: check
 check: $(src_files)
-	crystal spec
+	crystal spec --tag ~online
 
 .PHONY: install
 install: $(installables)
