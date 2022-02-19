@@ -1,3 +1,9 @@
+diclionary (0.1.1-1) focal; urgency=medium
+
+  * Fixed parsing of some types of entries in SSJC.
+
+ -- Singon <singond@seznam.cz>  Wed, 17 Feb 2022 22:35:06 +0100
+
 diclionary (0.1.0-2) focal; urgency=medium
 
   * Fix OBS package

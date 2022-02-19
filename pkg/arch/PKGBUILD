@@ -1,6 +1,6 @@
 # Maintainer: Jan "Singon" Slany <singond@seznam.cz>
 pkgname="diclionary"
-pkgver="0.1.0"
+pkgver="0.1.1"
 pkgrel=1
 epoch=
 pkgdesc="A command-line interface for selected online dictionaries."
@@ -22,7 +22,7 @@ changelog=
 source=("$pkgname-${pkgver//_/-}.tar.gz")
 noextract=()
 validpgpkeys=()
-sha256sums=('e463b235c810cac1474db8abddf2fba63a63bc783a59259fd497e8e4e22d425c')
+sha256sums=('f8c05bf8b4980d3a702fc27e7631c77062a43c24820e1840d08a0a2c0f0391e5')
 
 build() {
 	cd "$pkgname-${pkgver//_/-}"
