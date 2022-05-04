@@ -23,13 +23,8 @@ module Diclionary::Ujc
 		def search(word : String, format : Format) : SearchResult
 			params = {"heslo" => word, "hsubstr" => "no", "where" => "hesla"}
 			url = "/search.php?" + HTTP::Params.encode(params)
-			Log.info {"Querying '#{URL}#{url}'"}
-			t_start = Time.monotonic
 			client = HTTP::Client.new(URL)
-			r = client.get(url)
-			client.close
-			t_end = Time.monotonic - t_start
-			Log.info {"Got response in #{t_end.total_seconds.round(3)} s."}
+			r = get_url(client, url)
 			Log.debug {"Parsing response"}
 			parse_response(XML.parse_html(r.body), format)
 		end

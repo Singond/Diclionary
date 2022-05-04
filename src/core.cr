@@ -1,4 +1,5 @@
 require "colorize"
+require "http/client"
 require "log"
 
 require "./markup.cr"
@@ -29,6 +30,21 @@ module Diclionary
 
 		# Searches *word* in the dictionary and returns the result.
 		abstract def search(word : String, format : Format) : SearchResult
+
+		protected def get_url(client : HTTP::Client, path : String)
+			Log.info {"Querying '#{client.host}#{path}'"}
+			t_start = Time.monotonic
+			response = client.get(path)
+			t_end = Time.monotonic - t_start
+			Log.info {"Got response in #{t_end.total_seconds.round(3)} s."}
+			response
+		end
+
+		protected def get_url(host : String, path : String)
+			client = HTTP::Client.new(host)
+			response = get_url(client, path)
+			client.close
+		end
 	end
 
 	struct Language
