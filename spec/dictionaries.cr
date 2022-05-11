@@ -12,9 +12,9 @@ struct FakeDictionary < Dictionary
 
 	def search(word, format) : SearchResult
 		if @entries.has_key? word
-			SearchResult.new(@entries[word])
+			SearchResult.new(@entries[word], dictionary: self)
 		else
-			SearchResult.new
+			SearchResult.new(self)
 		end
 	end
 end

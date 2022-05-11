@@ -49,7 +49,7 @@ module Diclionary::Ujc
 					entries = [entry] of Entry
 				end
 			end
-			SearchResult.new(entries)
+			SearchResult.new(entries, self)
 		end
 
 		def parse_entry_plain(nodeset : XML::NodeSet) : TextEntry

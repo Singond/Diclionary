@@ -156,16 +156,17 @@ module Diclionary
 	# Result of searching a single word in a single dictionary.
 	struct SearchResult
 		getter entries : Array(Entry)
+		getter dictionary : Dictionary
 
-		def initialize(@entries : Array(Entry))
+		def initialize(@entries : Array(Entry), @dictionary : Dictionary)
 		end
 
-		def initialize(*entries : Entry)
-			initialize(entries.to_a)
+		def initialize(*entries : Entry, dictionary : Dictionary)
+			initialize(entries.to_a, dictionary)
 		end
 
-		def initialize()
-			initialize([] of Entry)
+		def initialize(dictionary : Dictionary)
+			initialize([] of Entry, dictionary)
 		end
 
 		def empty?()
