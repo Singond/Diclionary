@@ -24,6 +24,17 @@ module Diclionary
 		return true
 	end
 
+	# Yields all entries in *allresults* to the block.
+	private def each_entry(allresults : AllResults, config : Config)
+		allresults.each_with_index do |(term, results), i|
+			results.each_with_index do |result, j|
+				result.entries.each do |entry|
+					yield entry, term, result.dictionary
+				end
+			end
+		end
+	end
+
 	def print_entry(entry : Entry, config : Config, io = STDOUT)
 		Colorize.on_tty_only!
 		justify = false
@@ -53,6 +64,20 @@ module Diclionary
 	end
 
 	def print_results(allresults : AllResults, config : Config,
+			stdout = STDOUT) : Bool
+		did_print = false
+		first = true
+		each_entry(allresults, config) do |entry, term, dict|
+			Log.debug {"Displaying entry for '#{term}'..."}
+			stdout.puts "" unless first
+			print_entry(entry, config, io: stdout)
+			did_print = true
+			first = false
+		end
+		did_print
+	end
+
+	def print_results_old(allresults : AllResults, config : Config,
 			stdout = STDOUT) : Bool
 		did_print = false
 		# print_terms = config.terms.size > 1
