@@ -325,6 +325,67 @@ describe "#format" do
 					12. dictum
 					EXPECTED
 			end
+			context "with a nested list" do
+				it "prints list items on new lines with indent" do
+					formatted = String.build {|io| format Lipsum[4], io, wrap_80}
+					formatted.should eq <<-EXPECTED
+						Donec sit amet facilisis lectus. Integer et fringilla velit. Sed aliquam eros ac
+						turpis tristique mollis. Maecenas luctus magna ac elit euismod fermentum.
+						 1. Curabitur pulvinar purus imperdiet purus fringilla, venenatis facilisis quam
+						    efficitur. Nunc justo diam, interdum ut varius a, laoreet ut justo.
+						     1. Integer velit diam, egestas non nisi ut, accumsan ornare eros. Aliquam
+						        rhoncus elementum cursus. Quisque vitae blandit ligula.
+						     2. Mauris et pellentesque nisi. Aenean nec felis elit. Sed sit amet tellus
+						        et velit luctus laoreet quis sed urna. Sed dictum fringilla nibh sit
+						        amet tempor. Nam vel sem tincidunt, tempor turpis ac, cursus mauris.
+						 2. Sed rutrum pulvinar sapien eget feugiat.
+						 3. Nulla vulputate mollis nisl eu venenatis. Vestibulum consectetur lorem
+						    augue, sed dictum arcu vulputate quis. Phasellus a velit velit. Morbi auctor
+						    ante sit amet justo molestie interdum. Fusce sed condimentum neque, nec
+						    aliquam magna. Maecenas et mollis risus, in facilisis nisl.
+						Proin elementum risus ut leo porttitor tristique. Sed sit amet tellus et velit
+						luctus laoreet quis sed urna. Sed dictum fringilla nibh sit amet tempor.
+
+						EXPECTED
+						#---------------------------------- 80 chars ----------------------------------#
+				end
+				it "indents list items with 'list indent' in addition to margins" do
+					style = TerminalStyle.new()
+					style.line_width = 64
+					style.left_margin = 2
+					style.right_margin = 2
+					style.list_indent = 6
+					formatted = String.build {|io| format Lipsum[4], io, style}
+					formatted.should eq <<-EXPECTED
+						  Donec sit amet facilisis lectus. Integer et fringilla velit.
+						  Sed aliquam eros ac turpis tristique mollis. Maecenas luctus
+						  magna ac elit euismod fermentum.
+						     1. Curabitur pulvinar purus imperdiet purus fringilla,
+						        venenatis facilisis quam efficitur. Nunc justo diam,
+						        interdum ut varius a, laoreet ut justo.
+						           1. Integer velit diam, egestas non nisi ut,
+						              accumsan ornare eros. Aliquam rhoncus elementum
+						              cursus. Quisque vitae blandit ligula.
+						           2. Mauris et pellentesque nisi. Aenean nec felis
+						              elit. Sed sit amet tellus et velit luctus
+						              laoreet quis sed urna. Sed dictum fringilla nibh
+						              sit amet tempor. Nam vel sem tincidunt, tempor
+						              turpis ac, cursus mauris.
+						     2. Sed rutrum pulvinar sapien eget feugiat.
+						     3. Nulla vulputate mollis nisl eu venenatis. Vestibulum
+						        consectetur lorem augue, sed dictum arcu vulputate
+						        quis. Phasellus a velit velit. Morbi auctor ante sit
+						        amet justo molestie interdum. Fusce sed condimentum
+						        neque, nec aliquam magna. Maecenas et mollis risus, in
+						        facilisis nisl.
+						  Proin elementum risus ut leo porttitor tristique. Sed sit
+						  amet tellus et velit luctus laoreet quis sed urna. Sed
+						  dictum fringilla nibh sit amet tempor.
+
+						EXPECTED
+						#-------------------------- 64 chars --------------------------#
+				end
+			end
 		end
 		context "configured with markers aligned left" do
 			it "wraps list items so they do not overflow into margins" do

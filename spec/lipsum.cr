@@ -75,5 +75,40 @@ Lipsum = markup(
 			Sed sit amet tellus et velit luctus laoreet quis sed urna. \
 			Sed dictum fringilla nibh sit amet tempor.
 			TEXT
+	),
+	paragraph("Donec sit amet facilisis lectus. Integer et fringilla velit. ",
+		"Sed aliquam eros ac turpis tristique mollis. ",
+		"Maecenas luctus magna ac elit euismod fermentum.",
+		ordered_list(
+			item(<<-ITEM, ordered_list(item(<<-SUBITEM), item(<<-SUBITEM))),
+				Curabitur pulvinar purus imperdiet purus fringilla, \
+				venenatis facilisis quam efficitur. \
+				Nunc justo diam, interdum ut varius a, laoreet ut justo.
+				ITEM
+				Integer velit diam, egestas non nisi ut, accumsan ornare eros. \
+				Aliquam rhoncus elementum cursus. Quisque vitae blandit ligula.
+				SUBITEM
+				Mauris et pellentesque nisi. Aenean nec felis elit. \
+				Sed sit amet tellus et velit luctus laoreet quis sed urna. \
+				Sed dictum fringilla nibh sit amet tempor. \
+				Nam vel sem tincidunt, tempor turpis ac, cursus mauris.
+				SUBITEM
+			item(<<-ITEM),
+				Sed rutrum pulvinar sapien eget feugiat.
+				ITEM
+			item(<<-ITEM)
+				Nulla vulputate mollis nisl eu venenatis. \
+				Vestibulum consectetur lorem augue, \
+				sed dictum arcu vulputate quis. Phasellus a velit velit. \
+				Morbi auctor ante sit amet justo molestie interdum. \
+				Fusce sed condimentum neque, nec aliquam magna. \
+				Maecenas et mollis risus, in facilisis nisl.
+				ITEM
+		),
+		<<-TEXT
+			Proin elementum risus ut leo porttitor tristique. \
+			Sed sit amet tellus et velit luctus laoreet quis sed urna. \
+			Sed dictum fringilla nibh sit amet tempor.
+			TEXT
 	)
 )
