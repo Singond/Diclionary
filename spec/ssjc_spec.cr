@@ -8,6 +8,11 @@ include Diclionary
 include Diclionary::Text
 include Diclionary::Ujc
 
+style = TerminalStyle.new
+style.list_marker_alignment = Alignment::Left
+style.line_width = 72
+style.justify = false
+
 def text_entry(term, format) : TextEntry
 	result = SSJC.search(term, format)
 	result.entries.size.should eq 1
@@ -17,11 +22,6 @@ def text_entry(term, format) : TextEntry
 end
 
 def printed(entry : TextEntry) : String
-	style = TerminalStyle.new
-	style.list_marker_alignment = Alignment::Left
-	style.line_width = 72
-	style.justify = false
-
 	output = String::Builder.new
 	Colorize.enabled = false
 	format entry.text, output, style
