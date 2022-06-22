@@ -13,7 +13,7 @@ module Diclionary::Ujc
 	struct SsjcDictionary < Dictionary
 		INSTANCE = new
 		URL = URI.new("https", "ssjc.ujc.cas.cz")
-		FIRST_ITEM_REGEX = /([^0-9]*)1.$/
+		FIRST_ITEM_REGEX = /^([^0-9]*)1.$/
 
 		def initialize(*args)
 			super("ssjc", "Slovník spisovného jazyka českého")

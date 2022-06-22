@@ -35,7 +35,7 @@ def parse_file(filename, format : Format) : SearchResult
 end
 
 describe SsjcDictionary do
-	pending "parses '11.' as the eleventh item in a list, not first" do
+	it "parses '11.' as the eleventh item in a list, not first" do
 		result = parse_file("spec/ssjc_longlist.html", Format::RichText)
 		entry = result.entries[0]
 		entry.should be_a TextEntry
@@ -44,9 +44,9 @@ describe SsjcDictionary do
 		ol = entry.text[0]
 		ol.size.should eq 11
 		ol[9].should be_a Item
-		ol[9].text.should eq "desátý význam"
+		ol[9].text.strip.should eq "desátý význam"
 		ol[10].should be_a Item
-		ol[10].text.should eq "jedenáctý význam"
+		ol[10].text.strip.should eq "jedenáctý význam"
 	end
 end
 
