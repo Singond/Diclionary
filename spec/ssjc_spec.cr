@@ -62,4 +62,13 @@ describe SsjcDictionary, tags: "online" do
 			list[0][1].text.should start_with "žert. krejčí"
 		end
 	end
+	it "can parse ordered list whose first item marker is prefixed" do
+		text = text_entry("jeviti", Format::RichText).text
+		list = text.find {|e, start| e.is_a? OrderedList}
+		if !list
+			fail "Parsed entry does not contain an ordered list"
+		else
+			list[0].size.should eq 4
+		end
+	end
 end
