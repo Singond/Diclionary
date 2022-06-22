@@ -1,5 +1,6 @@
 require "spec"
 
+require "../src/markup.cr"
 require "../src/ssjc.cr"
 require "../src/term.cr"
 
@@ -25,6 +26,28 @@ def printed(entry : TextEntry) : String
 	Colorize.enabled = false
 	format entry.text, output, style
 	output.to_s.chomp('\n')
+end
+
+def parse_file(filename, format : Format) : SearchResult
+	raw = File.read(filename)
+	html = XML.parse_html(raw)
+	SSJC.parse_response(html, format)
+end
+
+describe SsjcDictionary do
+	pending "parses '11.' as the eleventh item in a list, not first" do
+		result = parse_file("spec/ssjc_longlist.html", Format::RichText)
+		entry = result.entries[0]
+		entry.should be_a TextEntry
+		entry = entry.as TextEntry
+		entry.text[0].should be_a OrderedList
+		ol = entry.text[0]
+		ol.size.should eq 11
+		ol[9].should be_a Item
+		ol[9].text.should eq "desátý význam"
+		ol[10].should be_a Item
+		ol[10].text.should eq "jedenáctý význam"
+	end
 end
 
 describe SsjcDictionary, tags: "online" do

@@ -29,7 +29,7 @@ module Diclionary::Ujc
 			parse_response(XML.parse_html(r.body), format)
 		end
 
-		private def parse_response(html, format : Format) : SearchResult
+		def parse_response(html, format : Format) : SearchResult
 			e = html.xpath("/html/body/div[1]/p[@class='entryhead']/*")
 			case e
 			in Bool, Float64, String
