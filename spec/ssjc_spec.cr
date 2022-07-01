@@ -14,9 +14,9 @@ style.line_width = 72
 style.justify = false
 
 def text_entry(term, format) : TextEntry
-	result = SSJC.search(term, format)
-	result.entries.size.should eq 1
-	entry = result.entries[0]
+	results = SSJC.search(term, format)
+	results.size.should eq 1
+	entry = results[0].entry
 	entry.should be_a TextEntry
 	entry.as TextEntry
 end
@@ -28,7 +28,7 @@ def printed(entry : TextEntry) : String
 	output.to_s.chomp('\n')
 end
 
-def parse_file(filename, format : Format) : SearchResult
+def parse_file(filename, format : Format) : Array(Entry)
 	raw = File.read(filename)
 	html = XML.parse_html(raw)
 	SSJC.parse_response(html, format)
@@ -36,8 +36,8 @@ end
 
 describe SsjcDictionary do
 	it "parses '11.' as the eleventh item in a list, not first" do
-		result = parse_file("spec/ssjc_longlist.html", Format::RichText)
-		entry = result.entries[0]
+		entries = parse_file("spec/ssjc_longlist.html", Format::RichText)
+		entry = entries[0]
 		entry.should be_a TextEntry
 		entry = entry.as TextEntry
 		entry.text[0].should be_a OrderedList

@@ -7,8 +7,7 @@ include Diclionary
 struct BuggyDictionary < Dictionary
 	getter search_languages : Array(Language) = [Language::English]
 
-	def search(word, format) : SearchResult
-		#SearchResult.new [TextEntry.new("something")] of Entry
+	def search(word, format) : Array(SearchResult)
 		raise "The search method failed"
 	end
 end

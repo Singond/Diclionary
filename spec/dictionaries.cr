@@ -10,11 +10,11 @@ struct FakeDictionary < Dictionary
 		@search_languages = langs
 	end
 
-	def search(word, format) : SearchResult
+	def search(word, format) : Array(SearchResult)
 		if @entries.has_key? word
-			SearchResult.new(@entries[word], dictionary: self)
+			[SearchResult.new(@entries[word], dictionary: self, term: word)]
 		else
-			SearchResult.new(self)
+			[] of SearchResult
 		end
 	end
 end

@@ -28,8 +28,8 @@ module Diclionary
 		def initialize(@name = "", @title = "")
 		end
 
-		# Searches *word* in the dictionary and returns the result.
-		abstract def search(word : String, format : Format) : SearchResult
+		# Searches *word* in the dictionary and returns the results.
+		abstract def search(word : String, format : Format) : Array(SearchResult)
 
 		protected def get_url(client : HTTP::Client, path : String)
 			Log.info {"Querying '#{client.host}#{path}'"}
@@ -153,28 +153,16 @@ module Diclionary
 		end
 	end
 
-	# Result of searching a single word in a single dictionary.
+	# Entry found by searching a dictionary.
 	struct SearchResult
-		getter entries : Array(Entry)
+		getter entry : Entry
 		getter dictionary : Dictionary
+		# The search term.
+		getter term : String
 
-		def initialize(@entries : Array(Entry), @dictionary : Dictionary)
-		end
-
-		def initialize(*entries : Entry, dictionary : Dictionary)
-			initialize(entries.to_a, dictionary)
-		end
-
-		def initialize(dictionary : Dictionary)
-			initialize([] of Entry, dictionary)
-		end
-
-		def empty?()
-			@entries.empty?
+		def initialize(@entry, @dictionary, @term)
 		end
 	end
-
-	alias AllResults = Hash(String, Array(SearchResult))
 
 	struct Config
 		property log_level : ::Log::Severity = ::Log::Severity::Notice

@@ -63,38 +63,16 @@ module Diclionary
 		end
 	end
 
-	def print_results(allresults : AllResults, config : Config,
+	def print_results(results : Array(SearchResult), config : Config,
 			stdout = STDOUT) : Bool
 		did_print = false
 		first = true
-		each_entry(allresults, config) do |entry, term, dict|
-			Log.debug {"Displaying entry for '#{term}'..."}
+		results.each do |result|
+			Log.debug {"Displaying entry for '#{result.term}'..."}
 			stdout.puts "" unless first
-			print_entry(entry, config, io: stdout)
+			print_entry(result.entry, config, io: stdout)
 			did_print = true
 			first = false
-		end
-		did_print
-	end
-
-	def print_results_old(allresults : AllResults, config : Config,
-			stdout = STDOUT) : Bool
-		did_print = false
-		# print_terms = config.terms.size > 1
-		allresults.each_with_index do |(term, results), i|
-			# if print_terms
-			# 	STDOUT << "[" << term.colorize.bold << "]\n"
-			# end
-			results.each_with_index do |result, j|
-				result.entries.each do |entry|
-					Log.debug {"Displaying entry for '#{term}'..."}
-					print_entry(entry, config, io: stdout)
-					unless i == allresults.size - 1 && j == results.size - 1
-						stdout.puts ""
-					end
-					did_print = true
-				end
-			end
 		end
 		did_print
 	end
@@ -117,18 +95,16 @@ module Diclionary
 			return ExitCode::BadConfig
 		end
 
-		results = AllResults.new(
-			[] of SearchResult, config.terms.size)
+		results = Array(SearchResult).new
 		channel = Channel(Nil).new
 		fibers = 0
 		dictionaries.each do |d|
 			config.terms.each do |word|
-				results[word] = [] of SearchResult
 				fibers += 1
 				spawn do
 					begin
 						Log.debug {"Searching for '#{word}'."}
-						results[word] << d.search(word, config.format)
+						results.concat d.search(word, config.format)
 						channel.send(nil)
 					rescue ex
 						stderr.puts ex.message

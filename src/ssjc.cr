@@ -20,24 +20,25 @@ module Diclionary::Ujc
 			@search_languages = [Language::Czech]
 		end
 
-		def search(word : String, format : Format) : SearchResult
+		def search(word : String, format : Format) : Array(SearchResult)
 			params = {"heslo" => word, "hsubstr" => "no", "where" => "hesla"}
 			url = "/search.php?" + HTTP::Params.encode(params)
 			client = HTTP::Client.new(URL)
 			r = get_url(client, url)
 			Log.debug {"Parsing response"}
-			parse_response(XML.parse_html(r.body), format)
+			parse_response(XML.parse_html(r.body), format).map do |entry|
+				SearchResult.new(entry, dictionary: self, term: word)
+			end
 		end
 
-		def parse_response(html, format : Format) : SearchResult
+		def parse_response(html, format : Format) : Array(Entry)
 			e = html.xpath("/html/body/div[1]/p[@class='entryhead']/*")
+			entries = [] of Entry
 			case e
 			in Bool, Float64, String
 				abort "Unexpected result #{e}", 2
 			in XML::NodeSet
-				if e.empty?
-					entries = [] of Entry
-				else
+				unless e.empty?
 					case format
 					in Format::PlainText
 						entry = parse_entry_plain(e)
@@ -46,10 +47,10 @@ module Diclionary::Ujc
 					in Format::Structured
 						entry = parse_entry_structured(e)
 					end
-					entries = [entry] of Entry
+					entries << entry
 				end
 			end
-			SearchResult.new(entries, self)
+			entries
 		end
 
 		def parse_entry_plain(nodeset : XML::NodeSet) : TextEntry
