@@ -75,12 +75,23 @@ describe "#run" do
 		end
 	end
 	context "ten, tea" do
-		it "prints individual entries separated by a blank line" do
-			o, e, c = run("ten", "tea")
+		it "prints individual entries separated by a header" do
+			o, e, c = run("ten", "tea", "--nocolor")
 			o.should eq <<-EXPECTED + "\n"
+
+			Zkušební slovník jazyka českého
+
+			ten
+
 			  ukazovací zájmeno
 
+			Testford English Dictionary
+
+			ten
+
 			  the numeral 10
+
+			tea
 
 			  a drink
 			EXPECTED

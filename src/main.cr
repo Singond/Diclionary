@@ -24,19 +24,39 @@ module Diclionary
 		return true
 	end
 
-	# Yields all entries in *allresults* to the block.
-	private def each_entry(allresults : AllResults, config : Config)
-		allresults.each_with_index do |(term, results), i|
-			results.each_with_index do |result, j|
-				result.entries.each do |entry|
-					yield entry, term, result.dictionary
-				end
+	# Yields elements in *results* to the block, grouped by dictionary.
+	private def group_by_dict(results : Array(SearchResult), config : Config)
+		grouped = Hash(Dictionary, Array(SearchResult)).new
+		grouped = results.reduce(grouped) do |acc, r|
+			unless acc.has_key?(r.dictionary)
+				acc[r.dictionary] = [] of SearchResult
+			end
+			acc[r.dictionary] << r
+			acc
+		end
+		grouped.keys.each do |key|
+			grouped[key].each do |result|
+				yield result
 			end
 		end
 	end
 
 	private def setup_colorize(io : IO, config : Config)
 		Colorize.enabled = io.tty? && config.color && ENV["TERM"]? != "dumb"
+	end
+
+	# Prints an entry header into *io*.
+	#
+	# If both *term* and *dict* are `nil`, prints nothing.
+	# Returns `true` if anything was printed.
+	private def print_header(term : String?, dict : Dictionary?,
+			config : Config, io = STDOUT)
+		return false unless term || dict
+		setup_colorize(io, config)
+		io << "\n"
+		io << dict.title.colorize.blue << "\n\n" if dict
+		io << term.colorize.blue << "\n\n" if term
+		return true
 	end
 
 	def print_entry(entry : Entry, config : Config, io = STDOUT)
@@ -68,15 +88,28 @@ module Diclionary
 	end
 
 	def print_results(results : Array(SearchResult), config : Config,
-			stdout = STDOUT) : Bool
+			stdout = STDOUT, print_term = false, print_dict = false) : Bool
 		did_print = false
-		first = true
-		results.each do |result|
+		prev : SearchResult? = nil
+		group_by_dict(results, config) do |result|
 			Log.debug {"Displaying entry for '#{result.term}'..."}
-			stdout.puts "" unless first
+			dict_changed = !prev || result.dictionary != prev.dictionary
+			term_changed = !prev || result.term != prev.term
+			term_changed ||= dict_changed
+
+			# Print header
+			was_header = print_header(
+				(term_changed && print_term) ? result.term : nil,
+				(dict_changed && print_dict) ? result.dictionary : nil,
+				config: config,
+				io: stdout
+			)
+			stdout.puts "" unless was_header || !prev
+
+			# Print entry
 			print_entry(result.entry, config, io: stdout)
 			did_print = true
-			first = false
+			prev = result
 		end
 		did_print
 	end
@@ -120,7 +153,9 @@ module Diclionary
 		fibers.times do
 			channel.receive
 		end
-		unless print_results(results, config, stdout)
+		unless print_results(results, config, stdout,
+				print_term: config.terms.size > 1,
+				print_dict: dictionaries.size > 1)
 			# No results found
 			return ExitCode::NoResult
 		end
