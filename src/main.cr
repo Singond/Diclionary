@@ -35,11 +35,15 @@ module Diclionary
 		end
 	end
 
+	private def setup_colorize(io : IO, config : Config)
+		Colorize.enabled = io.tty? && config.color && ENV["TERM"]? != "dumb"
+	end
+
 	def print_entry(entry : Entry, config : Config, io = STDOUT)
-		Colorize.on_tty_only!
+		setup_colorize(io, config)
 		justify = false
 		width = 0
-		if io.tty? && ENV["TERM"]? != "dumb"
+		if io.tty?
 			justify = true
 			width = term_width
 		end

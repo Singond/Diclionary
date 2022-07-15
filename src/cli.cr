@@ -44,6 +44,10 @@ module Diclionary::Cli
 			p.on "--structured", "Output in structured format" do
 				config.format = Format::Structured
 			end
+			p.on "--nocolor", "Disable colored output" do
+				Log.debug {"Disabling color output."}
+				config.color = false
+			end
 			p.on "-d DICT", "--dictionary=DICT",
 					"Search in dictionary DICT" do |dict_name|
 				Log.debug {"Setting dictionary to #{dict_name}."}

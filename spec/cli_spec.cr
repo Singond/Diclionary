@@ -22,6 +22,7 @@ def run(args : Array(String), tty = true)
 	log_backend = Log::IOBackend.new(io: stderr, formatter: Fmt, dispatcher: :sync)
 	Log.setup("*", :warn, log_backend)
 	exit_code = Diclionary::Cli.run(args, stdout, stderr)
+	Colorize.on_tty_only!  # Enable coloured test output
 	{stdout.to_s, stderr.to_s, exit_code}
 end
 

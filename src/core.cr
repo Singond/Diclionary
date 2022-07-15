@@ -168,6 +168,7 @@ module Diclionary
 		property log_level : ::Log::Severity = ::Log::Severity::Notice
 		property terms = [] of String
 		property format : Format = Format::RichText
+		property color : Bool = true
 		property dictionary : String?
 		property search_lang : Language?
 	end
