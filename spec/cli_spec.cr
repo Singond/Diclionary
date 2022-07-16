@@ -67,6 +67,13 @@ describe "#run" do
 			c.should eq Diclionary::ExitCode::NoResult
 		end
 	end
+	context "when given a single dictionary to search" do
+		it "does not display a header" do
+			o, e, c = run("ten", "--dictionary=ted")
+			o.should_not match /Testford/
+		end
+	end
+
 	context "ten" do
 		it "searches the word 'ten' in all available dictionaries" do
 			o, e, c = run("ten")
