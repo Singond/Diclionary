@@ -50,8 +50,8 @@ module Diclionary::Cli
 			end
 			p.on "-d DICT", "--dictionary=DICT",
 					"Search in dictionary DICT" do |dict_name|
-				Log.debug {"Setting dictionary to #{dict_name}."}
-				config.dictionary = dict_name
+				Log.debug {"Adding dictionary '#{dict_name}'."}
+				config.dictionaries << dict_name
 			end
 			p.on "-l LANG", "--language=LANG",
 					"Search entries in LANG" do |lang_code|
@@ -63,6 +63,12 @@ module Diclionary::Cli
 					Log.error {"Unknown language '#{lang_code}'."}
 					exit_code = ExitCode::BadUsage
 				end
+			end
+			p.on "--list-dictionaries", "List installed dictionaries" do
+				Diclionary.all_dictionaries().each do |dict|
+					stdout.puts "#{dict.name}: #{dict.title}"
+				end
+				exit_code = ExitCode::Success
 			end
 		end
 		parser.unknown_args do |args|

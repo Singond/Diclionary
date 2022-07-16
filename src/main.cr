@@ -12,13 +12,36 @@ module Diclionary
 		end
 	end
 
-	def init_dictionaries(config : Config) : Array(Dictionary)
+	def all_dictionaries() : Array(Dictionary)
+		Log.debug {"Initializing available dictionaries..."}
 		all = [Diclionary::Ujc::SSJC] of Dictionary
 		all
 	end
 
+	# Selects elements from *dictionaries* matching *config*,
+	# preserving the order in which they were given, if applicable.
+	def select_dictionaries(config : Config, dictionaries = all_dictionaries) \
+			: Array(Dictionary)
+		selected = if config.dictionaries.empty?
+			# No dictionary names selected, use all dictionaries
+			dictionaries
+		else
+			# Use only the selected dictionaries in that order
+			config.dictionaries.uniq.compact_map do |dict_name|
+				dict = dictionaries.find { |d| d.name == dict_name }
+				unless dict
+					Log.error {"Unknown dictionary '#{dict_name}'."}
+					Log.error {"Run 'dicl --list-dictionaries' to see installed dictionaries."}
+				end
+				dict
+			end
+		end
+		selected.select do |dict|
+			is_applicable?(dict, config)
+		end
+	end
+
 	def is_applicable?(dict : Dictionary, cfg : Config) : Bool
-		return false if cfg.dictionary && dict.name != cfg.dictionary
 		l = cfg.search_lang
 		return false if l && !dict.search_languages.includes?(l)
 		return true
@@ -123,11 +146,8 @@ module Diclionary
 			return ExitCode::BadUsage
 		end
 
-		all_dictionaries = init_dictionaries(config)
-		dictionaries = all_dictionaries.select do |dict|
-			is_applicable?(dict, config)
-		end
-		if all_dictionaries.size > 0 && dictionaries.size == 0
+		dictionaries = select_dictionaries(config)
+		if dictionaries.size == 0
 			Log.error {"No dictionaries match the search criteria."}
 			return ExitCode::BadConfig
 		end

@@ -59,6 +59,16 @@ describe "#run" do
 			exit_code.should eq Diclionary::ExitCode::Success
 		end
 	end
+	context "--list-dictionaries" do
+		it "prints all installed dictionaries" do
+			o, e, c = run("--list-dictionaries")
+			o.lines.sort.join("\n").should eq <<-EXPECTED
+			ted: Testford English Dictionary
+			zsjc: Zkušební slovník jazyka českého
+			EXPECTED
+		end
+	end
+
 	context "when searching a word not existing in any dictionary" do
 		it "exits with error code" do
 			o, e, c = run("xxxxxx")
@@ -71,6 +81,14 @@ describe "#run" do
 		it "does not display a header" do
 			o, e, c = run("ten", "--dictionary=ted")
 			o.should_not match /Testford/
+		end
+	end
+	context "given a non-existent dictionary" do
+		it "prints an error and exits" do
+			o, e, c = run("ten", "--dictionary=xxx")
+			o.should be_empty
+			e.should match /Unknown dictionary/
+			e.should match /Run 'dicl --list-dictionaries'/
 		end
 	end
 

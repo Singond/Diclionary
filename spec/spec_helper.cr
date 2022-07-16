@@ -3,7 +3,7 @@ require "spec"
 include Diclionary
 
 # Use mocked dictionaries in tests.
-# The following redefines the `init_dictionaries` method to return a custom
+# The following redefines the `all_dictionaries` method to return a custom
 # array of dictionaries.
 # The array must be set beforehand by calling `dictionaries = [dicts]`.
 #
@@ -12,7 +12,7 @@ include Diclionary
 module Diclionary
 	Dicts = [] of Dictionary
 
-	def init_dictionaries(config : Config) : Array(Dictionary)
+	def all_dictionaries() : Array(Dictionary)
 		Dicts
 	end
 

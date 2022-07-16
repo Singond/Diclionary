@@ -169,7 +169,7 @@ module Diclionary
 		property terms = [] of String
 		property format : Format = Format::RichText
 		property color : Bool = true
-		property dictionary : String?
+		property dictionaries = [] of String
 		property search_lang : Language?
 	end
 end
