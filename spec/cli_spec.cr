@@ -151,7 +151,7 @@ describe "#run" do
 		it "fails with an error message" do
 			o, e, c = run("ten", "--language=xx")
 			o.should be_empty
-			e.should match /Unknown language: xx/
+			e.should match /Unknown language 'xx'/
 			c.should eq Diclionary::ExitCode::BadUsage
 		end
 	end

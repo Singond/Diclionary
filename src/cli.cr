@@ -60,7 +60,7 @@ module Diclionary::Cli
 				if lang
 					config.search_lang = lang
 				else
-					Log.error {"Unknown language: #{lang_code}."}
+					Log.error {"Unknown language '#{lang_code}'."}
 					exit_code = ExitCode::BadUsage
 				end
 			end
