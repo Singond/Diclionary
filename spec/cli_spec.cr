@@ -32,7 +32,7 @@ end
 
 describe "#run" do
 	before_each do
-		Diclionary.dictionaries = [Cs1, En1]
+		Diclionary.dictionaries = [Cs1, En1, En2]
 	end
 
 	context "without arguments" do
@@ -63,6 +63,7 @@ describe "#run" do
 		it "prints all installed dictionaries" do
 			o, e, c = run("--list-dictionaries")
 			o.lines.sort.join("\n").should eq <<-EXPECTED
+			neud: The New English Universal Dictionary
 			ted: Testford English Dictionary
 			zsjc: Zkušební slovník jazyka českého
 			EXPECTED
@@ -97,6 +98,7 @@ describe "#run" do
 			o, e, c = run("ten")
 			o.includes?("ukazovací zájmeno").should be_true
 			o.includes?("the numeral 10").should be_true
+			o.includes?("something between nine and eleven").should be_true
 		end
 	end
 	context "ten, tea" do
@@ -119,6 +121,12 @@ describe "#run" do
 			tea
 
 			  a drink
+
+			The New English Universal Dictionary
+
+			ten
+
+			  something between nine and eleven
 			EXPECTED
 		end
 	end
@@ -148,9 +156,16 @@ describe "#run" do
 	end
 	context "ten --language=en" do
 		it "searches the meaning of the English word 'ten'" do
-			o, e, c = run("ten", "--language=en")
+			o, e, c = run("ten", "--language=en", "--nocolor")
 			o.should eq <<-EXPECTED + "\n"
+
+			Testford English Dictionary
+
 			  the numeral 10
+
+			The New English Universal Dictionary
+
+			  something between nine and eleven
 			EXPECTED
 		end
 	end

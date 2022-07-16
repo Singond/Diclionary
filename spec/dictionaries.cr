@@ -27,3 +27,7 @@ En1 = FakeDictionary.new("ted", "Testford English Dictionary")
 En1.search_languages = [Language::English]
 En1.entries["ten"] = TextEntry.new("the numeral 10")
 En1.entries["tea"] = TextEntry.new("a drink")
+
+En2 = FakeDictionary.new("neud", "The New English Universal Dictionary")
+En2.search_languages = [Language::English]
+En2.entries["ten"] = TextEntry.new("something between nine and eleven")
