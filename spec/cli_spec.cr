@@ -67,7 +67,7 @@ describe "#run" do
 			c.should eq Diclionary::ExitCode::NoResult
 		end
 	end
-	context "when given a single dictionary to search" do
+	context "when explicitly given a single dictionary to search" do
 		it "does not display a header" do
 			o, e, c = run("ten", "--dictionary=ted")
 			o.should_not match /Testford/
