@@ -1,4 +1,4 @@
-.TH DICL 1 2021-07-29
+.TH DICL 1 2022-07-17
 .SH NAME
 dicl \- command-line interface for selected online dictionaries
 .
@@ -14,15 +14,18 @@ and display the results in terminal.
 .
 .SH OPTIONS
 .TP 4
-.B \-\-version
-Print version and exit.
+.BR \-l , \ \-\-language=\fILANG
+Search only entries where the \fIWORD\fR is in language \fILANG\fR.
+For example, if both an English and a German dictionary is installed,
+the command
+.B dicl\ \-\-language=de\ bald
+will only search the meaning of the German word \fBbald\fR,
+not the English one.
 .TP
-.B \-h, \-\-help
-Print usage and exit.
-.TP
-.B \-v, \-\-verbose
-Increase verbosity. This option can be repeated to increase verbosity
-even further.
+.BR \-d , \ \-\-dictionary=\fIDICT
+Search in dictionary named \fIDICT\fR.
+Can be repeated to search in multiple dictionaries.
+The default is to search in all installed dictionaries.
 .TP
 .B \-\-plain
 Output the results as plain text. When using this option, the text
@@ -36,3 +39,16 @@ which can be extracted from an entry varies greatly between dictionaries,
 and the results may not reflect the original content correctly.
 Therefore, this option is only supported for some dictionaries,
 others will simply ignore it.
+.TP
+.B \-\-nocolor
+Disable colored output.
+.TP
+.BR \-v , \ \-\-verbose
+Increase verbosity. This option can be repeated to increase verbosity
+even further.
+.TP
+.BR \-h , \ \-\-help
+Print usage and exit.
+.TP
+.B \-\-version
+Print version and exit.
