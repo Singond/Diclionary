@@ -1,5 +1,7 @@
 require "./core.cr"
 require "./term.cr"
+
+require "./psjc.cr"
 require "./ssjc.cr"
 
 module Diclionary
@@ -14,8 +16,7 @@ module Diclionary
 
 	def all_dictionaries() : Array(Dictionary)
 		Log.debug {"Initializing available dictionaries..."}
-		all = [Diclionary::Ujc::SSJC] of Dictionary
-		all
+		[Diclionary::Ujc::SSJC, Diclionary::Ujc::PSJC] of Dictionary
 	end
 
 	# Selects elements from *dictionaries* matching *config*,
