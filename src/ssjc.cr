@@ -4,13 +4,14 @@ require "xml"
 
 require "./core.cr"
 require "./languages.cr"
+require "./ujc.cr"
 
 include Diclionary::Text
 
 module Diclionary::Ujc
 	SSJC = SsjcDictionary::INSTANCE
 
-	struct SsjcDictionary < Dictionary
+	struct SsjcDictionary < UjcDictionary
 		INSTANCE = new
 		URL = URI.new("https", "ssjc.ujc.cas.cz")
 		FIRST_ITEM_REGEX = /^([^0-9]*)1.$/
@@ -32,39 +33,9 @@ module Diclionary::Ujc
 		end
 
 		def parse_response(html, format : Format) : Array(Entry)
-			e = html.xpath("/html/body/div[1]/p[@class='entryhead']/*")
-			entries = [] of Entry
-			case e
-			in Bool, Float64, String
-				abort "Unexpected result #{e}", 2
-			in XML::NodeSet
-				unless e.empty?
-					case format
-					in Format::PlainText
-						entry = parse_entry_plain(e)
-					in Format::RichText
-						entry = parse_entry_rich(e)
-					in Format::Structured
-						entry = parse_entry_structured(e)
-					end
-					entries << entry
-				end
-			end
-			entries
-		end
-
-		def parse_entry_plain(nodeset : XML::NodeSet) : TextEntry
-			Log.debug {"Parsing #{nodeset.size} XML nodes as text entry"}
-			entry_text = ""
-			nodeset.each do |node|
-				cls = (node["class"]? || "").split
-				text = node.content
-				if cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
-					text = "\n" + text
-				end
-				entry_text += text
-			end
-			TextEntry.new markup(entry_text)
+			ns = html.xpath("/html/body/div[1]/p[@class='entryhead']/*")
+					.as?(XML::NodeSet)
+			ns ? parse_entry(ns, format) : [] of Entry
 		end
 
 		def parse_entry_rich(nodeset : XML::NodeSet) : TextEntry
