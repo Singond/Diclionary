@@ -105,7 +105,6 @@ describe "#run" do
 		it "prints individual entries separated by a header" do
 			o, e, c = run("ten", "tea", "--nocolor")
 			o.should eq <<-EXPECTED + "\n"
-
 			Zkušební slovník jazyka českého
 
 			ten
@@ -158,7 +157,6 @@ describe "#run" do
 		it "searches the meaning of the English word 'ten'" do
 			o, e, c = run("ten", "--language=en", "--nocolor")
 			o.should eq <<-EXPECTED + "\n"
-
 			Testford English Dictionary
 
 			  the numeral 10

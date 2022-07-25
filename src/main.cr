@@ -76,9 +76,10 @@ module Diclionary
 			config : Config, io = STDOUT)
 		return false unless term || dict
 		setup_colorize(io, config)
-		io << "\n"
-		io << dict.title.colorize.blue << "\n\n" if dict
-		io << term.colorize.blue << "\n\n" if term
+		Colorize.with.blue.surround(io) do
+			io << dict.title << "\n\n" if dict
+			io << term << "\n\n" if term
+		end
 		return true
 	end
 
@@ -121,13 +122,13 @@ module Diclionary
 			term_changed ||= dict_changed
 
 			# Print header
-			was_header = print_header(
+			stdout.puts "" if prev
+			print_header(
 				(term_changed && print_term) ? result.term : nil,
 				(dict_changed && print_dict) ? result.dictionary : nil,
 				config: config,
 				io: stdout
 			)
-			stdout.puts "" unless was_header || !prev
 
 			# Print entry
 			print_entry(result.entry, config, io: stdout)
