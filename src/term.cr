@@ -231,18 +231,18 @@ module Diclionary::Text
 			@line_width = @width - (@next_left_skip + @right_skip)
 		end
 
-		def read(bytes : Bytes)
-			@io.read(bytes)
+		def read(slice : Bytes)
+			@io.read(slice)
 		end
 
-		def write(bytes : Bytes) : Nil
+		def write(slice : Bytes) : Nil
 			if @line_width < 1
-				@io.write(bytes)
+				@io.write(slice)
 				return
 			end
 
 			word = String.build do |io|
-				io.write(bytes)
+				io.write(slice)
 			end
 			# For now, assume only control sequences
 			# are written with this method
