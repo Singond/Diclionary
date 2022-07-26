@@ -66,7 +66,7 @@ module Diclionary::Cli
 			end
 			p.on "--list-dictionaries", "List installed dictionaries" do
 				Diclionary.all_dictionaries().each do |dict|
-					stdout.puts "#{dict.name}: #{dict.title}"
+					stdout.puts "#{dict.id}: #{dict.name}"
 				end
 				exit_code = ExitCode::Success
 			end

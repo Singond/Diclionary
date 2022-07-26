@@ -28,7 +28,7 @@ module Diclionary
 		else
 			# Use only the selected dictionaries in that order
 			config.dictionaries.uniq.compact_map do |dict_name|
-				dict = dictionaries.find { |d| d.name == dict_name }
+				dict = dictionaries.find { |d| d.id == dict_name }
 				unless dict
 					Log.error {"Unknown dictionary '#{dict_name}'."}
 					Log.error {"Run 'dicl --list-dictionaries' to see installed dictionaries."}
@@ -77,7 +77,7 @@ module Diclionary
 		return false unless term || dict
 		setup_colorize(io, config)
 		Colorize.with.blue.surround(io) do
-			io << dict.title << "\n\n" if dict
+			io << dict.name << "\n\n" if dict
 			io << term << "\n\n" if term
 		end
 		return true

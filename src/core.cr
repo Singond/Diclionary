@@ -21,11 +21,13 @@ module Diclionary
 
 	# A connector to a dictionary.
 	abstract struct Dictionary
+		# Unique machine name
+		getter id : String
+		# Pretty name
 		getter name : String
-		getter title : String
 		getter search_languages : Array(Language) = [] of Language
 
-		def initialize(@name = "", @title = "")
+		def initialize(@id = "", @name = "")
 		end
 
 		# Searches *word* in the dictionary and returns the results.
