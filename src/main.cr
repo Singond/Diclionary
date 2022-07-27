@@ -92,6 +92,14 @@ module Diclionary
 		style
 	end
 
+	private def print_dictionary_header(dict : Dictionary, io = STDOUT)
+		io << dict.name
+		if year = dict.year
+			io << " (" << year << ")"
+		end
+		io << "\n"
+	end
+
 	# Prints an entry header into *io*.
 	#
 	# If both *term* and *dict* are `nil`, prints nothing.
@@ -101,7 +109,10 @@ module Diclionary
 		return false unless term || dict
 		setup_colorize(io, config)
 		Colorize.with.blue.surround(io) do
-			io << dict.name << "\n\n" if dict
+			if dict
+				print_dictionary_header(dict, io)
+				io << "\n"
+			end
 			io << term << "\n\n" if term
 		end
 		return true
