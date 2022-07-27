@@ -3,6 +3,7 @@ require "./term.cr"
 require "./ssjc.cr"
 
 module Diclionary
+
 	def term_width : Int32
 		w = ENV["COLUMNS"]?
 		if w
@@ -68,6 +69,29 @@ module Diclionary
 		Colorize.enabled = io.tty? && config.color && ENV["TERM"]? != "dumb"
 	end
 
+	private def term_style(io : IO, config : Config?) : TerminalStyle
+		style = TerminalStyle.new
+		style.left_margin = 2
+		style.right_margin = 2
+		style.list_marker_alignment = Alignment::Left
+
+		justify = false
+		width = 0
+		if io.tty?
+			justify = true
+			width = term_width
+		end
+
+		if width > 0
+			style.line_width = width
+			style.justify = justify
+		else
+			# A dumb terminal
+			style.line_width = 0
+		end
+		style
+	end
+
 	# Prints an entry header into *io*.
 	#
 	# If both *term* and *dict* are `nil`, prints nothing.
@@ -85,26 +109,10 @@ module Diclionary
 
 	def print_entry(entry : Entry, config : Config, io = STDOUT)
 		setup_colorize(io, config)
-		justify = false
-		width = 0
-		if io.tty?
-			justify = true
-			width = term_width
-		end
+		style = term_style(io, config)
 
 		case entry
 		in TextEntry
-			style = TerminalStyle.new
-			style.left_margin = 2
-			style.right_margin = 2
-			style.list_marker_alignment = Alignment::Left
-			if width > 0
-				style.line_width = width
-				style.justify = justify
-			else
-				# A dumb terminal
-				style.line_width = 0
-			end
 			format entry.text, io, style
 		in StructuredEntry
 			io.puts entry
