@@ -9,7 +9,7 @@ class Tty < String::Builder
 end
 
 Log.define_formatter Fmt, "#{message}"
-def run(args : Array(String), tty = true)
+def run(args : Array(String), tty = true, color = false)
 	stdout : IO
 	stderr : IO
 	if tty
@@ -23,11 +23,16 @@ def run(args : Array(String), tty = true)
 	Log.setup("*", :warn, log_backend)
 	exit_code = Diclionary::Cli.run(args, stdout, stderr)
 	Colorize.on_tty_only!  # Enable coloured test output
-	{stdout.to_s, stderr.to_s, exit_code}
+	out = stdout.to_s
+	err = stderr.to_s
+	unless color
+		out = out.gsub(/\e\[[0-9;]+m/, "")
+	end
+	{out, err, exit_code}
 end
 
-def run(*args : String, tty = true)
-	run(args.to_a, tty: tty)
+def run(*args : String, tty = true, color = false)
+	run(args.to_a, tty: tty, color: color)
 end
 
 describe "#run" do
