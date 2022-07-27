@@ -157,27 +157,49 @@ describe "#format" do
 		end
 	end
 	context "given a paragraph" do
-		it "separates it from surrounding text by blank lines" do
-			style = TerminalStyle.new()
-			style.line_width = 40
-			m = markup("Line outside paragraph.",
-				paragraph(<<-PAR),
-					This is the beginning of a paragraph. \
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-					PAR
-				"Outside paragraph again.")
-			formatted = String.build {|io| format m, io, style}
-			formatted.should eq <<-EXPECTED
-				Line outside paragraph.
+		context "when line length is not set" do
+			pending "separates it from surrounding text by blank lines" do
+				style = TerminalStyle.new()
+				m = markup("Line outside paragraph.",
+					paragraph(<<-PAR),
+						This is the beginning of a paragraph. \
+						Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+						PAR
+					"Outside paragraph again.")
+				formatted = String.build {|io| format m, io, style}
+				formatted.should eq <<-EXPECTED
+					Line outside paragraph.
 
-				This is the beginning of a paragraph.
-				Lorem ipsum dolor sit amet, consectetur
-				adipiscing elit.
+					This is the beginning of a paragraph. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 
-				Outside paragraph again.
+					Outside paragraph again.
 
-				EXPECTED
-				#-------------- 40 chars --------------#
+					EXPECTED
+			end
+		end
+		context "when line length is set" do
+			it "separates it from surrounding text by blank lines" do
+				style = TerminalStyle.new()
+				style.line_width = 40
+				m = markup("Line outside paragraph.",
+					paragraph(<<-PAR),
+						This is the beginning of a paragraph. \
+						Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+						PAR
+					"Outside paragraph again.")
+				formatted = String.build {|io| format m, io, style}
+				formatted.should eq <<-EXPECTED
+					Line outside paragraph.
+
+					This is the beginning of a paragraph.
+					Lorem ipsum dolor sit amet, consectetur
+					adipiscing elit.
+
+					Outside paragraph again.
+
+					EXPECTED
+					#-------------- 40 chars --------------#
+			end
 		end
 	end
 	context "given an ordered list" do
