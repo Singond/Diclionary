@@ -100,6 +100,23 @@ module Diclionary
 		io << "\n"
 	end
 
+	def list_dictionaries(dicts : Array(Dictionary), io = STDOUT,
+			config : Config? = nil)
+		style = term_style(io, config)
+		dicts.each do |dict|
+			Colorize.with.blue.surround(io) do
+				print_dictionary_header(dict, io)
+				io << "[" << dict.id << "]\n"
+			end
+			format dict.info, io, style
+			io << "\n\n"
+		end
+	end
+
+	def list_dictionaries(io = STDOUT, config : Config? = nil)
+		list_dictionaries(all_dictionaries, io, config)
+	end
+
 	# Prints an entry header into *io*.
 	#
 	# If both *term* and *dict* are `nil`, prints nothing.

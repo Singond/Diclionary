@@ -6,6 +6,9 @@ include Diclionary
 struct FakeDictionary < Dictionary
 	getter entries = Hash(String, Entry).new
 
+	def initialize(@id, @name, @description = nil)
+	end
+
 	def search_languages=(langs)
 		@search_languages = langs
 	end
@@ -23,7 +26,8 @@ Cs1 = FakeDictionary.new("zsjc", "Zkušební slovník jazyka českého")
 Cs1.search_languages = [Language::Czech]
 Cs1.entries["ten"] = TextEntry.new("ukazovací zájmeno")
 
-En1 = FakeDictionary.new("ted", "Testford English Dictionary")
+En1 = FakeDictionary.new("ted", "Testford English Dictionary",
+	"The classical English dictionary")
 En1.search_languages = [Language::English]
 En1.entries["ten"] = TextEntry.new("the numeral 10")
 En1.entries["tea"] = TextEntry.new("a drink")

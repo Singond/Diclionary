@@ -67,10 +67,30 @@ describe "#run" do
 	context "--list-dictionaries" do
 		it "prints all installed dictionaries" do
 			o, e, c = run("--list-dictionaries")
-			o.lines.sort.join("\n").should eq <<-EXPECTED
-			neud: The New English Universal Dictionary
-			ted: Testford English Dictionary
-			zsjc: Zkušební slovník jazyka českého
+			lines = o.lines
+			idx = lines.index {|l| l =~ /The New English Universal Dictionary/}
+			idx.should_not be_nil
+			idx = idx.not_nil!
+			lines[idx,2].join("\n").should eq <<-EXPECTED
+			The New English Universal Dictionary
+			[neud]
+			EXPECTED
+
+			idx = lines.index {|l| l =~ /Testford English Dictionary/}
+			idx.should_not be_nil
+			idx = idx.not_nil!
+			lines[idx,3].join("\n").should eq <<-EXPECTED
+			Testford English Dictionary
+			[ted]
+			  The classical English dictionary
+			EXPECTED
+
+			idx = lines.index {|l| l =~ /Zkušební slovník jazyka českého/}
+			idx.should_not be_nil
+			idx = idx.not_nil!
+			lines[idx,2].join("\n").should eq <<-EXPECTED
+			Zkušební slovník jazyka českého
+			[zsjc]
 			EXPECTED
 		end
 	end

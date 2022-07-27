@@ -58,6 +58,29 @@ module Diclionary
 			response = get_url(client, path)
 			client.close
 		end
+
+		def info() : Markup
+			m = markup
+			if desc = @description
+				m.children << paragraph(desc)
+			end
+			if author = @author
+				m.children << paragraph(author)
+			end
+			publisher = @publisher
+			year = @year
+			if publisher || year
+				par = Paragraph.new
+				par.children << markup(publisher) if publisher
+				par.children << markup(", ") if publisher && year
+				par.children << markup("#{year}")
+				m.children << par
+			end
+			if url = @url
+				m.children << paragraph(url)
+			end
+			m
+		end
 	end
 
 	struct Language
