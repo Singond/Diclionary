@@ -17,6 +17,10 @@ module Diclionary::Ujc
 
 		def initialize(*args)
 			super("ssjc", "Slovník spisovného jazyka českého")
+			@year = "1960–1971"
+			@author = "B. Havránek et al."
+			@publisher = "Ústav pro jazyk český"
+			@url = "http://ssjc.ujc.cas.cz"
 			@search_languages = [Language::Czech]
 		end
 

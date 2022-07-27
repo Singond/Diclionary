@@ -25,6 +25,17 @@ module Diclionary
 		getter id : String
 		# Pretty name
 		getter name : String
+		# Description
+		getter description : String?
+		# Author(s)
+		getter author : String?
+		# Year(s) of publication
+		getter year : String?
+		# Publisher (if applicable)
+		getter publisher : String?
+		# Website URL
+		getter url : String?
+
 		getter search_languages : Array(Language) = [] of Language
 
 		def initialize(@id = "", @name = "")
