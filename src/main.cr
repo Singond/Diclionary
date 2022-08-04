@@ -103,13 +103,15 @@ module Diclionary
 	def list_dictionaries(dicts : Array(Dictionary), io = STDOUT,
 			config : Config? = nil)
 		style = term_style(io, config)
+		first = true
 		dicts.each do |dict|
+			io << "\n\n" unless first
 			Colorize.with.blue.surround(io) do
 				print_dictionary_header(dict, io)
 				io << "[" << dict.id << "]\n"
 			end
 			format dict.info, io, style
-			io << "\n\n"
+			first = false
 		end
 	end
 

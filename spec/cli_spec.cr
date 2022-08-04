@@ -92,6 +92,9 @@ describe "#run" do
 			Zkušební slovník jazyka českého
 			[zsjc]
 			EXPECTED
+
+			lines.first.should_not be_empty
+			lines.last.should_not be_empty
 		end
 	end
 
