@@ -12,10 +12,18 @@ module Diclionary::Cli
 		io << "\n"
 	end
 
+	private enum Mode
+		RUN
+		LIST_DICTIONARIES
+		VERSION
+		HELP
+	end
+
 	private def parse_args(args, stdout = STDOUT, stderr = STDERR) \
-			: {Config | ExitCode, OptionParser}
+			: {Mode, Config, OptionParser}
 		Log.debug {"Parsing args"}
 		config = Config.new
+		mode = nil
 		exit_code = nil
 		parser = OptionParser.new do |p|
 			p.banner = <<-BANNER
@@ -24,12 +32,10 @@ module Diclionary::Cli
 			Options:
 			BANNER
 			p.on "--version", "Show version number and exit" do
-				stdout.puts VERSION
-				exit_code = ExitCode::Success
+				mode = Mode::VERSION unless mode
 			end
 			p.on "-h", "--help", "Print usage and exit" do
-				usage(stdout, p)
-				exit_code = ExitCode::Success
+				mode = Mode::HELP unless mode
 			end
 			p.on "-v", "--verbose", "Increase verbosity" do
 				# Decrease logging level, if possible.
@@ -60,13 +66,12 @@ module Diclionary::Cli
 				if lang
 					config.search_lang = lang
 				else
-					Log.error {"Unknown language '#{lang_code}'."}
-					exit_code = ExitCode::BadUsage
+					raise OptionParser::Exception.new(
+						"Unknown language '#{lang_code}'.")
 				end
 			end
 			p.on "--list-dictionaries", "List installed dictionaries" do
-				Diclionary.list_dictionaries stdout, config
-				exit_code = ExitCode::Success
+				mode = Mode::LIST_DICTIONARIES unless mode
 			end
 		end
 		parser.unknown_args do |args|
@@ -75,28 +80,33 @@ module Diclionary::Cli
 			end
 		end
 		parser.parse args
-
-		e = exit_code
-		return {e || config, parser}
+		return {(m = mode) ? m : Mode::RUN, config, parser}
 	end
 
 	def run(args = ARGV, stdout = STDOUT, stderr = STDERR) : ExitCode
 		begin
-			config, parser = parse_args(args, stdout, stderr)
+			mode, config, parser = parse_args(args, stdout, stderr)
 		rescue e : OptionParser::Exception
 			stderr.puts e.message
 			return ExitCode::BadUsage
 		end
 
-		case config
-		in ExitCode
-			return config
-		in Config
+		case mode
+		in Mode::RUN
 			if config.terms.empty?
 				usage(stderr, parser)
 				return ExitCode::BadUsage
 			end
 			Diclionary.run(config, stdout: stdout, stderr: stderr)
+		in Mode::LIST_DICTIONARIES
+			Diclionary.list_dictionaries stdout, config
+			return ExitCode::Success
+		in Mode::HELP
+			usage(stdout, parser)
+			return ExitCode::Success
+		in Mode::VERSION
+			stdout.puts VERSION
+			return ExitCode::Success
 		end
 	end
 end
