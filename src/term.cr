@@ -22,8 +22,176 @@ module Diclionary::Text
 		Right
 	end
 
+	class TerminalFormatter
+		@style : TerminalStyle
+		@io : IO
+		@at_start = true
+		@pending_whitespace = ""
+		@whitespace_written = false
+		@bold = 0
+		@italic = 0
+		@dim = 0
+		@numbering = Deque(Int32).new
+		@in_ordered_list = false
+		@indentation_level = 0
+		@lw : LineWrapper
+
+		def initialize(@style, @io = STDOUT)
+			@lw = LineWrapper.new(@io, @style.line_width, @style.justify)
+			@lw.left_skip = @style.left_margin
+			@lw.right_skip = @style.right_margin
+		end
+
+		def format(text : Markup)
+			#whitespace_written = false
+			text.each do |e, start|
+				if start
+					@whitespace_written = false
+					open(e)
+					@pending_whitespace = "" if @whitespace_written
+				else
+					close(e)
+				end
+			end
+			@lw.flush unless @lw.empty?
+		end
+
+		private def open(e : PlainText)
+			return if e.text.empty?
+			@at_start = false
+			c = Colorize.with
+			if @bold > 0
+				c = c.bold
+			end
+			if @dim > 0
+				c = c.dim
+			end
+			@io << @pending_whitespace
+			@whitespace_written = true
+			c.surround(@lw) do
+				@lw << "\e[3m" if @italic > 0
+				s = StringScanner.new(e.text)
+				until s.eos?
+					word = s.scan_until(/\s+/)
+					if !word
+						word = s.rest
+						s.terminate
+					end
+					trailing_spaces = s[0]?
+					if trailing_spaces
+						word = word[..-(trailing_spaces.size + 1)]
+						@lw.write(Printable.new(word))
+						@lw.write(Whitespace.new(trailing_spaces))
+					else
+						@lw.write(Printable.new(word))
+					end
+				end
+				@lw << "\e[0m" if @italic > 0
+			end
+		end
+
+		private def open(e : Bold)
+			@bold += 1;
+		end
+
+		private def close(e : Bold)
+			@bold -= 1;
+		end
+
+		private def open(e : Italic)
+			@italic += 1;
+		end
+
+		private def close(e : Italic)
+			@italic -= 1;
+		end
+
+		private def open(e : Small)
+			@dim += 1;
+		end
+
+		private def close(e : Small)
+			@dim -= 1;
+		end
+
+		private def open(e : Paragraph)
+			unless @lw.empty?
+				@lw.flush
+				@pending_whitespace = "\n"
+			end
+			@lw.next_left_skip = \
+					@style.left_margin + @style.paragraph_indent
+			return if e.text.empty?
+			if @pending_whitespace.ends_with? "\n"
+				@io << @pending_whitespace
+				@whitespace_written = true
+			elsif !@at_start
+				@io << "\n"
+			end
+		end
+
+		private def close(e : Paragraph)
+			@lw.flush unless @lw.empty?
+			@pending_whitespace = "\n" unless e.text.empty?
+		end
+
+		private def open(e : OrderedList)
+			unless @lw.empty?
+				@lw.flush
+			end
+			@numbering.push 0
+			@indentation_level += 1
+			@lw.left_skip = @style.left_margin +
+					@style.list_indent * @indentation_level
+		end
+
+		private def close(e : OrderedList)
+			@lw.flush unless @lw.empty?
+			@numbering.pop unless @numbering.empty?
+			@indentation_level -= 1
+			@lw.left_skip = @style.left_margin +
+					@style.list_indent * @indentation_level
+		end
+
+		private def open(e : Item)
+			n = @numbering.pop + 1
+			@numbering.push n
+			indent = @style.list_indent * @indentation_level
+			@io << " " * @style.left_margin
+			case @style.list_marker_alignment
+			in Alignment::Left
+				@io << "#{n}. ".ljust(indent)
+			in Alignment::Center
+				@io << "#{n}. ".center(indent)
+			in Alignment::Right
+				@io << "#{n}. ".rjust(indent)
+			end
+			@lw.next_left_skip = 0
+			@lw.line_width = @style.line_width -
+					(indent + @style.left_margin + @style.right_margin)
+		end
+
+		private def close(e : Item)
+			@lw.flush unless @lw.empty?
+		end
+
+		private def open(e)
+			# Default case: Do nothing
+		end
+
+		private def close(e)
+			# Default case: Do nothing
+		end
+	end
+
 	# Formats the given *text* for display in terminal.
 	def format(text : Markup, io : IO = STDOUT,
+			style : TerminalStyle = TerminalStyle::DEFAULT)
+		TerminalFormatter.new(style, io).format(text)
+	end
+
+	# Formats the given *text* for display in terminal.
+	def format_old(text : Markup, io : IO = STDOUT,
 			style : TerminalStyle = TerminalStyle::DEFAULT)
 		at_start = true
 		pending_whitespace = ""
