@@ -20,6 +20,7 @@ class String
 			line.strip.size.should be <= width
 		end
 	end
+
 	def should_be_justified(width : Int32)
 		l = lines
 		l.each_with_index do |line, number|
@@ -39,6 +40,11 @@ class String
 			end
 		end
 		l.last.size.should be <= width
+	end
+
+	# Ensure newlines are not interpreted in failure messages.
+	def inspect()
+		"\n" + self
 	end
 end
 
