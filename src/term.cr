@@ -33,12 +33,12 @@ module Diclionary::Text
 		@dim = 0
 		@numbering = Deque(Int32).new
 		@in_ordered_list = false
-		@indentation_level = 0
+		@indentation = Deque(Int32).new
 		@lw : LineWrapper
 
 		def initialize(@style, @io = STDOUT)
 			@lw = LineWrapper.new(@io, @style.line_width, @style.justify)
-			@lw.left_skip = @style.left_margin
+			indent(@style.left_margin)
 			@lw.right_skip = @style.right_margin
 		end
 
@@ -54,6 +54,19 @@ module Diclionary::Text
 				end
 			end
 			@lw.flush unless @lw.empty?
+		end
+
+		# Increases the default `left_skip` by *amount*.
+		private def indent(amount)
+			@indentation.push amount
+			@lw.left_skip = @indentation.sum
+		end
+
+		# Decreases the default `left_skip` by the last amount
+		# added with `#indent`.
+		private def dedent()
+			@indentation.pop
+			@lw.left_skip = @indentation.sum
 		end
 
 		private def open(e : PlainText)
@@ -136,28 +149,22 @@ module Diclionary::Text
 		end
 
 		private def open(e : OrderedList)
-			unless @lw.empty?
-				@lw.flush
-			end
+			@lw.flush unless @lw.empty?
 			@numbering.push 0
-			@indentation_level += 1
-			@lw.left_skip = @style.left_margin +
-					@style.list_indent * @indentation_level
+			indent(@style.list_indent)
 		end
 
 		private def close(e : OrderedList)
 			@lw.flush unless @lw.empty?
 			@numbering.pop unless @numbering.empty?
-			@indentation_level -= 1
-			@lw.left_skip = @style.left_margin +
-					@style.list_indent * @indentation_level
+			dedent
 		end
 
 		private def open(e : Item)
 			n = @numbering.pop + 1
 			@numbering.push n
-			indent = @style.list_indent * @indentation_level
-			@io << " " * @style.left_margin
+			indent = @style.list_indent
+			@io << " " * (@indentation.sum - indent)
 			case @style.list_marker_alignment
 			in Alignment::Left
 				@io << "#{n}. ".ljust(indent)
@@ -168,7 +175,7 @@ module Diclionary::Text
 			end
 			@lw.next_left_skip = 0
 			@lw.line_width = @style.line_width -
-					(indent + @style.left_margin + @style.right_margin)
+					(@indentation.sum + @style.right_margin)
 		end
 
 		private def close(e : Item)
