@@ -69,6 +69,36 @@ module Diclionary::Text
 			@lw.left_skip = @indentation.sum
 		end
 
+		# Prints a label dedented with respect to current setting.
+		private def dedent_label(label : String, levels = 1,
+				align = Alignment::Left)
+			@lw.flush unless @lw.empty?
+			white_width = 0
+			print_width = 0
+			@indentation.each_with_index do |val, idx|
+				if idx < @indentation.size - levels
+					@io << " " * val
+					white_width += val
+				else
+					print_width += val
+				end
+			end
+
+			if print_width >= label.size
+				case align
+				in Alignment::Left
+					@io << label.ljust(print_width)
+				in Alignment::Center
+					@io << label.center(print_width)
+				in Alignment::Right
+					@io << label.rjust(print_width)
+				end
+				@lw.ignore_left_skip(white_width + print_width)
+			else
+				@io << label << "\n"
+			end
+		end
+
 		private def open(e : PlainText)
 			return if e.text.empty?
 			@at_start = false
@@ -163,17 +193,7 @@ module Diclionary::Text
 		private def open(e : Item)
 			n = @numbering.pop + 1
 			@numbering.push n
-			indent = @style.list_indent
-			@io << " " * (@indentation.sum - indent)
-			case @style.list_marker_alignment
-			in Alignment::Left
-				@io << "#{n}. ".ljust(indent)
-			in Alignment::Center
-				@io << "#{n}. ".center(indent)
-			in Alignment::Right
-				@io << "#{n}. ".rjust(indent)
-			end
-			@lw.ignore_left_skip(@indentation.sum)
+			dedent_label("#{n}. ", align: @style.list_marker_alignment)
 		end
 
 		private def close(e : Item)
