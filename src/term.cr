@@ -173,9 +173,7 @@ module Diclionary::Text
 			in Alignment::Right
 				@io << "#{n}. ".rjust(indent)
 			end
-			@lw.next_left_skip = 0
-			@lw.line_width = @style.line_width -
-					(@indentation.sum + @style.right_margin)
+			@lw.ignore_left_skip(@indentation.sum)
 		end
 
 		private def close(e : Item)
@@ -404,6 +402,19 @@ module Diclionary::Text
 
 		private def update_widths
 			@line_width = @width - (@next_left_skip + @right_skip)
+		end
+
+		# Sets *count* characters of left skip to be ignored (not printed)
+		# when the next line is printed.
+		#
+		# This is like setting `next_left_skip`, but without automatically
+		# recalculating the line width.
+		def ignore_left_skip(count : Int32)
+			if @next_left_skip >= count
+				@next_left_skip = @next_left_skip - count
+			else
+				@next_left_skip = 0
+			end
 		end
 
 		def read(slice : Bytes)
