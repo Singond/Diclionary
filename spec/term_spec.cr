@@ -512,3 +512,46 @@ describe Paragraph do
 			#-------------- 40 chars --------------#
 	end
 end
+
+describe LabeledParagraph do
+	it "has a left-aligned label and an indented body" do
+		style = TerminalStyle.new()
+		style.line_width = 60
+		m = markup(
+			Lipsum[3][0],
+			labeled_paragraph("Lorem Ipsum", Lipsum[0], indent: 4)
+		)
+		formatted = String.build {|io| format m, io, style}
+		formatted.should eq <<-EXPECTED
+			Donec sit amet facilisis lectus. Integer et fringilla velit.
+
+			Lorem Ipsum
+			    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+			    Etiam nec tortor id magna vulputate pretium. Suspendisse
+			    porta bibendum malesuada. Integer velit diam, egestas
+			    non nisi ut, accumsan ornare eros. Aliquam rhoncus
+			    elementum cursus. Quisque vitae blandit ligula. Proin
+			    elit turpis, ornare et malesuada at, mattis in sem.
+			    Aliquam tortor lectus, convallis sit amet tristique ac,
+			    rhoncus eu lectus. Pellentesque tempus eleifend eros in
+			    elementum. Mauris et pellentesque nisi. Aenean nec felis
+			    elit. Sed sit amet tellus et velit luctus laoreet quis
+			    sed urna. Sed dictum fringilla nibh sit amet tempor. Nam
+			    vel sem tincidunt, tempor turpis ac, cursus mauris.
+
+			EXPECTED
+			#------------------------ 60 chars ------------------------#
+	end
+	it "has a short label in line with the first line of the body" do
+		style = TerminalStyle.new()
+		style.line_width = 60
+		m = LabeledParagraph.new "-v", Lipsum[3][0], indent: 4
+		formatted = String.build {|io| format m, io, style}
+		formatted.should eq <<-EXPECTED
+			-v  Donec sit amet facilisis lectus. Integer et fringilla
+			    velit.
+
+			EXPECTED
+			#------------------------ 60 chars ------------------------#
+	end
+end

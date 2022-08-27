@@ -201,6 +201,21 @@ module Diclionary::Text
 			@lw.flush unless @lw.empty?
 		end
 
+		private def open(e : LabeledParagraph)
+			unless @lw.empty?
+				@lw.flush
+				@io << "\n"
+			end
+			indent(e.indent)
+			dedent_label(e.label, align: Alignment::Left)
+		end
+
+		private def close(e : LabeledParagraph)
+			@lw.flush unless @lw.empty?
+			@pending_whitespace = "\n"
+			dedent
+		end
+
 		private def open(e)
 			# Default case: Do nothing
 		end
