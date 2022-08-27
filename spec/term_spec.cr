@@ -477,3 +477,38 @@ describe LineWrapper do
 		lines[0].strip.size.should eq 74
 	end
 end
+
+describe Paragraph do
+	it "is separated from surrounding text and paragraphs by blank lines" do
+		style = TerminalStyle.new()
+		style.line_width = 40
+		m = markup("Line outside paragraph.",
+			paragraph(<<-PAR),
+				This is the beginning of a paragraph. \
+				Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+				PAR
+			paragraph(<<-PAR),
+				This is a second paragraph. \
+				Fusce sed condimentum neque, nec aliquam magna. \
+				Maecenas et mollis risus, in facilisis nisl.
+				PAR
+			"Outside paragraph again.")
+		formatted = String.build {|io| format m, io, style}
+		formatted.should eq <<-EXPECTED
+			Line outside paragraph.
+
+			This is the beginning of a paragraph.
+			Lorem ipsum dolor sit amet, consectetur
+			adipiscing elit.
+
+			This is a second paragraph. Fusce sed
+			condimentum neque, nec aliquam magna.
+			Maecenas et mollis risus, in facilisis
+			nisl.
+
+			Outside paragraph again.
+
+			EXPECTED
+			#-------------- 40 chars --------------#
+	end
+end

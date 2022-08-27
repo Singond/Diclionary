@@ -25,7 +25,6 @@ module Diclionary::Text
 	class TerminalFormatter
 		@style : TerminalStyle
 		@io : IO
-		@at_start = true
 		@pending_whitespace = ""
 		@whitespace_written = false
 		@bold = 0
@@ -60,6 +59,12 @@ module Diclionary::Text
 		private def indent(amount)
 			@indentation.push amount
 			@lw.left_skip = @indentation.sum
+		end
+
+		# Increases the default `left_skip` by *amount*
+		# for the next line to be written.
+		private def indent_one(amount)
+			@lw.next_left_skip = @indentation.sum + amount
 		end
 
 		# Decreases the default `left_skip` by the last amount
@@ -101,7 +106,6 @@ module Diclionary::Text
 
 		private def open(e : PlainText)
 			return if e.text.empty?
-			@at_start = false
 			c = Colorize.with
 			if @bold > 0
 				c = c.bold
@@ -162,14 +166,11 @@ module Diclionary::Text
 				@lw.flush
 				@pending_whitespace = "\n"
 			end
-			@lw.next_left_skip = \
-					@style.left_margin + @style.paragraph_indent
 			return if e.text.empty?
+			indent_one(@style.paragraph_indent)
 			if @pending_whitespace.ends_with? "\n"
 				@io << @pending_whitespace
 				@whitespace_written = true
-			elsif !@at_start
-				@io << "\n"
 			end
 		end
 
