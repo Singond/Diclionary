@@ -75,7 +75,7 @@ module Diclionary::Ujc
 			Log.debug {"Parsing #{nodeset.size} XML nodes as rich text entry"}
 			parents = Deque(Markup).new
 			par = Paragraph.new [] of Markup
-			root = markup(par)
+			root = Base.new(par)
 			parents.push(root)
 			parents.push(par)
 			node = nodeset[0]

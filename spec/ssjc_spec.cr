@@ -40,11 +40,14 @@ def parse_file_rich(filename) : Array(TextEntry)
 end
 
 describe SsjcDictionary do
+	it "produces markup whose root is not a Paragraph" do
+		entry = parse_file_rich("spec/ssjc_longlist.html")[0]
+		entry.text.should_not be_a Paragraph
+	end
 	it "parses '11.' as the eleventh item in a list, not first" do
-		entries = parse_file_rich("spec/ssjc_longlist.html")
-		entry = entries[0]
-		entry.text[0].should be_a OrderedList
-		ol = entry.text[0]
+		entry = parse_file_rich("spec/ssjc_longlist.html")[0]
+		ol = entry.text[0][0]
+		ol.should be_a OrderedList
 		ol.size.should eq 11
 		ol[9].should be_a Item
 		ol[9].text.strip.should eq "desátý význam"
