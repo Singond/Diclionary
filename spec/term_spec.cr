@@ -510,6 +510,15 @@ describe OrderedList do
 	# end
 end
 
+describe Item do
+	it "produces an error if not in a list" do
+		m = markup(item("Item outside of a list"))
+		expect_raises(Exception, "Item without enclosing list") do
+			String.build {|io| format m, io, wrap_80}
+		end
+	end
+end
+
 describe LabeledParagraph do
 	it "has a left-aligned label and an indented body" do
 		style = TerminalStyle.new()

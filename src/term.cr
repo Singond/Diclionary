@@ -30,6 +30,7 @@ module Diclionary::Text
 		@bold = 0
 		@italic = 0
 		@dim = 0
+		@lists = [] of OrderedList
 		@numbering = Deque(Int32).new
 		@in_ordered_list = false
 		@indentation = Deque(Int32).new
@@ -181,17 +182,22 @@ module Diclionary::Text
 
 		private def open(e : OrderedList)
 			@lw.flush unless @lw.empty?
-			@numbering.push 0
 			indent(@style.list_indent)
+			@lists.push e
+			@numbering.push 0
 		end
 
 		private def close(e : OrderedList)
 			@lw.flush unless @lw.empty?
 			@numbering.pop unless @numbering.empty?
+			@lists.pop unless @lists.empty?
 			dedent
 		end
 
 		private def open(e : Item)
+			if @lists.empty?
+				raise "Item without enclosing list"
+			end
 			n = @numbering.pop + 1
 			@numbering.push n
 			dedent_label("#{n}. ", align: @style.list_marker_alignment)
