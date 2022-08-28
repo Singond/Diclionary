@@ -34,12 +34,15 @@ def parse_file(filename, format : Format) : Array(Entry)
 	SSJC.parse_response(html, format)
 end
 
+def parse_file_rich(filename) : Array(TextEntry)
+	entries = parse_file(filename, Format::RichText)
+	entries.map(&.as(TextEntry))
+end
+
 describe SsjcDictionary do
 	it "parses '11.' as the eleventh item in a list, not first" do
-		entries = parse_file("spec/ssjc_longlist.html", Format::RichText)
+		entries = parse_file_rich("spec/ssjc_longlist.html")
 		entry = entries[0]
-		entry.should be_a TextEntry
-		entry = entry.as TextEntry
 		entry.text[0].should be_a OrderedList
 		ol = entry.text[0]
 		ol.size.should eq 11
