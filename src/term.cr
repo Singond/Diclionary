@@ -210,7 +210,11 @@ module Diclionary::Text
 		private def open(e : LabeledParagraph)
 			unless @lw.empty?
 				@lw.flush
-				@io << "\n"
+				@pending_whitespace = "\n"
+			end
+			if @pending_whitespace.ends_with? "\n"
+				@io << @pending_whitespace
+				@whitespace_written = true
 			end
 			indent(e.indent)
 			dedent_label(e.label, align: Alignment::Left)
