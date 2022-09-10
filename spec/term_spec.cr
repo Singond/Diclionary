@@ -560,4 +560,40 @@ describe LabeledParagraph do
 			EXPECTED
 			#------------------------ 60 chars ------------------------#
 	end
+	pending "is separated from other labeled paragraphs by a blank line" do
+		style = TerminalStyle.new()
+		style.line_width = 60
+		m = markup(
+			# labeled_paragraph("Lo", Lipsum[3][3][0].text, indent: 4),
+			# labeled_paragraph("Lorem Ipsum", Lipsum[3][3][0].text, indent: 4),
+			labeled_paragraph("Lorem Ipsum", Lipsum[3][3][0].text, indent: 4),
+			labeled_paragraph("Dolor", Lipsum[3][3][1].text, indent: 4),
+			labeled_paragraph("Sit", Lipsum[3][3][2].text, indent: 4),
+			labeled_paragraph("Amet", Lipsum[3][3][0].text, indent: 4)
+		)
+		formatted = String.build {|io| format m, io, style}
+		formatted.should eq <<-EXPECTED
+			Lorem Ipsum
+			    Curabitur pulvinar purus imperdiet purus fringilla,
+			    venenatis facilisis quam efficitur. Nunc justo diam,
+			    interdum ut varius a, laoreet ut justo.
+
+			Dolor
+			    Sed rutrum pulvinar sapien eget feugiat.
+
+			Sit Nulla vulputate mollis nisl eu venenatis. Vestibulum
+			    consectetur lorem augue, sed dictum arcu vulputate quis.
+			    Phasellus a velit velit. Morbi auctor ante sit amet
+			    justo molestie interdum. Fusce sed condimentum neque,
+			    nec aliquam magna. Maecenas et mollis risus, in
+			    facilisis nisl.
+
+			Amet
+			    Curabitur pulvinar purus imperdiet purus fringilla,
+			    venenatis facilisis quam efficitur. Nunc justo diam,
+			    interdum ut varius a, laoreet ut justo.
+
+			EXPECTED
+			#------------------------ 60 chars ------------------------#
+	end
 end
