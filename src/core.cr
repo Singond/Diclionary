@@ -64,20 +64,22 @@ module Diclionary
 			if desc = @description
 				m.children << paragraph(desc)
 			end
+			kw = {indent: 8}
 			if author = @author
-				m.children << paragraph(author)
+				m.children << labeled_paragraph("Author:", author, **kw)
 			end
 			publisher = @publisher
 			year = @year
 			if publisher || year
-				par = Paragraph.new
-				par.children << markup(publisher) if publisher
-				par.children << markup(", ") if publisher && year
-				par.children << markup("#{year}")
+				body = markup
+				body.children << markup(publisher) if publisher
+				body.children << markup(", ") if publisher && year
+				body.children << markup("#{year}")
+				par = LabeledParagraph.new("Published by:", body, **kw)
 				m.children << par
 			end
 			if url = @url
-				m.children << paragraph(url)
+				m.children << labeled_paragraph("URL:", url, **kw)
 			end
 			m
 		end
