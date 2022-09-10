@@ -75,9 +75,13 @@ module Diclionary::Text
 			@lw.left_skip = @indentation.sum
 		end
 
-		# Prints a label dedented with respect to current setting.
+		# Prints *label* dedented with respect to current indentation
+		# setting.
+		#
+		# The *rmargin* sets the minimum amount of whitespace between
+		# the label and the body (if it starts on the same line).
 		private def dedent_label(label : String, levels = 1,
-				align = Alignment::Left)
+				align = Alignment::Left, rmargin = 1)
 			@lw.flush unless @lw.empty?
 			white_width = 0
 			print_width = 0
@@ -90,17 +94,23 @@ module Diclionary::Text
 				end
 			end
 
-			if print_width >= label.size
+			if print_width >= (label.size + rmargin)
 				case align
 				in Alignment::Left
 					@io << label.ljust(print_width)
+					# Margin already handled by ljust.
 				in Alignment::Center
-					@io << label.center(print_width)
+					# XXX: Offsets the label even when there is enough space.
+					# Ignore this issue for now (the center alignment is
+					# ugly anyway).
+					@io << (label + " " * rmargin).center(print_width)
 				in Alignment::Right
-					@io << label.rjust(print_width)
+					@io << label.rjust(print_width - rmargin)
+					@io << " " * rmargin
 				end
 				@lw.ignore_left_skip(white_width + print_width)
 			else
+				# Printing on separate line: ignore the separator
 				@io << label << "\n"
 			end
 		end
@@ -200,7 +210,7 @@ module Diclionary::Text
 			end
 			n = @numbering.pop + 1
 			@numbering.push n
-			dedent_label("#{n}. ", align: @style.list_marker_alignment)
+			dedent_label("#{n}.", align: @style.list_marker_alignment)
 		end
 
 		private def close(e : Item)

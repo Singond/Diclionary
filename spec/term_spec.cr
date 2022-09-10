@@ -560,7 +560,7 @@ describe LabeledParagraph do
 			EXPECTED
 			#------------------------ 60 chars ------------------------#
 	end
-	pending "is separated from other labeled paragraphs by a blank line" do
+	it "is separated from other labeled paragraphs by a blank line" do
 		style = TerminalStyle.new()
 		style.line_width = 60
 		m = markup(
