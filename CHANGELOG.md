@@ -5,6 +5,8 @@ Changelog
 ------------
 ### Added
 - This changelog.
+- A new option `--list-dictionaries` which displays a list of all currently
+  installed dictionaries.
 
 ### Changed
 - Improved parsing of entries in `ssjc` containing multiple headwords.

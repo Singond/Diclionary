@@ -5,6 +5,7 @@ require "./psjc.cr"
 require "./ssjc.cr"
 
 module Diclionary
+
 	def term_width : Int32
 		w = ENV["COLUMNS"]?
 		if w
@@ -29,7 +30,7 @@ module Diclionary
 		else
 			# Use only the selected dictionaries in that order
 			config.dictionaries.uniq.compact_map do |dict_name|
-				dict = dictionaries.find { |d| d.name == dict_name }
+				dict = dictionaries.find { |d| d.id == dict_name }
 				unless dict
 					Log.error {"Unknown dictionary '#{dict_name}'."}
 					Log.error {"Run 'dicl --list-dictionaries' to see installed dictionaries."}
@@ -69,6 +70,57 @@ module Diclionary
 		Colorize.enabled = io.tty? && config.color && ENV["TERM"]? != "dumb"
 	end
 
+	private def term_style(io : IO, config : Config?) : TerminalStyle
+		style = TerminalStyle.new
+		style.left_margin = 2
+		style.right_margin = 2
+		style.list_marker_alignment = Alignment::Left
+
+		justify = false
+		width = 0
+		if io.tty?
+			justify = true
+			width = term_width
+		end
+
+		if width > 0
+			style.line_width = width
+			style.justify = justify
+		else
+			# A dumb terminal
+			style.line_width = 0
+		end
+		style
+	end
+
+	private def print_dictionary_header(dict : Dictionary, io = STDOUT)
+		io << dict.name
+		if year = dict.year
+			io << " (" << year << ")"
+		end
+		io << "\n"
+	end
+
+	def list_dictionaries(dicts : Array(Dictionary), io = STDOUT,
+			config : Config? = nil)
+		style = term_style(io, config)
+		setup_colorize(io, config)
+		first = true
+		dicts.each do |dict|
+			io << "\n\n" unless first
+			Colorize.with.blue.surround(io) do
+				print_dictionary_header(dict, io)
+				io << "[" << dict.id << "]\n"
+			end
+			format dict.info, io, style
+			first = false
+		end
+	end
+
+	def list_dictionaries(io = STDOUT, config : Config? = nil)
+		list_dictionaries(all_dictionaries, io, config)
+	end
+
 	# Prints an entry header into *io*.
 	#
 	# If both *term* and *dict* are `nil`, prints nothing.
@@ -77,34 +129,22 @@ module Diclionary
 			config : Config, io = STDOUT)
 		return false unless term || dict
 		setup_colorize(io, config)
-		io << "\n"
-		io << dict.title.colorize.blue << "\n\n" if dict
-		io << term.colorize.blue << "\n\n" if term
+		Colorize.with.blue.surround(io) do
+			if dict
+				print_dictionary_header(dict, io)
+				io << "\n"
+			end
+			io << term << "\n\n" if term
+		end
 		return true
 	end
 
 	def print_entry(entry : Entry, config : Config, io = STDOUT)
 		setup_colorize(io, config)
-		justify = false
-		width = 0
-		if io.tty?
-			justify = true
-			width = term_width
-		end
+		style = term_style(io, config)
 
 		case entry
 		in TextEntry
-			style = TerminalStyle.new
-			style.left_margin = 2
-			style.right_margin = 2
-			style.list_marker_alignment = Alignment::Left
-			if width > 0
-				style.line_width = width
-				style.justify = justify
-			else
-				# A dumb terminal
-				style.line_width = 0
-			end
 			format entry.text, io, style
 		in StructuredEntry
 			io.puts entry
@@ -122,13 +162,13 @@ module Diclionary
 			term_changed ||= dict_changed
 
 			# Print header
-			was_header = print_header(
+			stdout.puts "" if prev
+			print_header(
 				(term_changed && print_term) ? result.term : nil,
 				(dict_changed && print_dict) ? result.dictionary : nil,
 				config: config,
 				io: stdout
 			)
-			stdout.puts "" unless was_header || !prev
 
 			# Print entry
 			print_entry(result.entry, config, io: stdout)

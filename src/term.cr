@@ -22,129 +22,233 @@ module Diclionary::Text
 		Right
 	end
 
+	class TerminalFormatter
+		@style : TerminalStyle
+		@io : IO
+		@pending_whitespace = ""
+		@whitespace_written = false
+		@bold = 0
+		@italic = 0
+		@dim = 0
+		@lists = [] of OrderedList
+		@numbering = Deque(Int32).new
+		@in_ordered_list = false
+		@indentation = Deque(Int32).new
+		@lw : LineWrapper
+
+		def initialize(@style, @io = STDOUT)
+			@lw = LineWrapper.new(@io, @style.line_width, @style.justify)
+			indent(@style.left_margin)
+			@lw.right_skip = @style.right_margin
+		end
+
+		def format(text : Markup)
+			#whitespace_written = false
+			text.each do |e, start|
+				if start
+					@whitespace_written = false
+					open(e)
+					@pending_whitespace = "" if @whitespace_written
+				else
+					close(e)
+				end
+			end
+			@lw.flush unless @lw.empty?
+		end
+
+		# Increases the default `left_skip` by *amount*.
+		private def indent(amount)
+			@indentation.push amount
+			@lw.left_skip = @indentation.sum
+		end
+
+		# Increases the default `left_skip` by *amount*
+		# for the next line to be written.
+		private def indent_one(amount)
+			@lw.next_left_skip = @indentation.sum + amount
+		end
+
+		# Decreases the default `left_skip` by the last amount
+		# added with `#indent`.
+		private def dedent()
+			@indentation.pop
+			@lw.left_skip = @indentation.sum
+		end
+
+		# Prints *label* dedented with respect to current indentation
+		# setting.
+		#
+		# The *rmargin* sets the minimum amount of whitespace between
+		# the label and the body (if it starts on the same line).
+		private def dedent_label(label : String, levels = 1,
+				align = Alignment::Left, rmargin = 1)
+			@lw.flush unless @lw.empty?
+			white_width = 0
+			print_width = 0
+			@indentation.each_with_index do |val, idx|
+				if idx < @indentation.size - levels
+					@io << " " * val
+					white_width += val
+				else
+					print_width += val
+				end
+			end
+
+			if print_width >= (label.size + rmargin)
+				case align
+				in Alignment::Left
+					@io << label.ljust(print_width)
+					# Margin already handled by ljust.
+				in Alignment::Center
+					# XXX: Offsets the label even when there is enough space.
+					# Ignore this issue for now (the center alignment is
+					# ugly anyway).
+					@io << (label + " " * rmargin).center(print_width)
+				in Alignment::Right
+					@io << label.rjust(print_width - rmargin)
+					@io << " " * rmargin
+				end
+				@lw.ignore_left_skip(white_width + print_width)
+			else
+				# Printing on separate line: ignore the separator
+				@io << label << "\n"
+			end
+		end
+
+		private def open(e : PlainText)
+			return if e.text.empty?
+			c = Colorize.with
+			if @bold > 0
+				c = c.bold
+			end
+			if @dim > 0
+				c = c.dim
+			end
+			@io << @pending_whitespace
+			@whitespace_written = true
+			c.surround(@lw) do
+				@lw << "\e[3m" if @italic > 0
+				s = StringScanner.new(e.text)
+				until s.eos?
+					word = s.scan_until(/\s+/)
+					if !word
+						word = s.rest
+						s.terminate
+					end
+					trailing_spaces = s[0]?
+					if trailing_spaces
+						word = word[..-(trailing_spaces.size + 1)]
+						@lw.write(Printable.new(word))
+						@lw.write(Whitespace.new(trailing_spaces))
+					else
+						@lw.write(Printable.new(word))
+					end
+				end
+				@lw << "\e[0m" if @italic > 0
+			end
+		end
+
+		private def open(e : Bold)
+			@bold += 1;
+		end
+
+		private def close(e : Bold)
+			@bold -= 1;
+		end
+
+		private def open(e : Italic)
+			@italic += 1;
+		end
+
+		private def close(e : Italic)
+			@italic -= 1;
+		end
+
+		private def open(e : Small)
+			@dim += 1;
+		end
+
+		private def close(e : Small)
+			@dim -= 1;
+		end
+
+		private def open(e : Paragraph)
+			unless @lw.empty?
+				@lw.flush
+				@pending_whitespace = "\n"
+			end
+			return if e.text.empty?
+			indent_one(@style.paragraph_indent)
+			if @pending_whitespace.ends_with? "\n"
+				@io << @pending_whitespace
+				@whitespace_written = true
+			end
+		end
+
+		private def close(e : Paragraph)
+			@lw.flush unless @lw.empty?
+			@pending_whitespace = "\n" unless e.text.empty?
+		end
+
+		private def open(e : OrderedList)
+			@lw.flush unless @lw.empty?
+			indent(@style.list_indent)
+			@lists.push e
+			@numbering.push 0
+		end
+
+		private def close(e : OrderedList)
+			@lw.flush unless @lw.empty?
+			@numbering.pop unless @numbering.empty?
+			@lists.pop unless @lists.empty?
+			dedent
+		end
+
+		private def open(e : Item)
+			if @lists.empty?
+				raise "Item without enclosing list"
+			end
+			n = @numbering.pop + 1
+			@numbering.push n
+			dedent_label("#{n}.", align: @style.list_marker_alignment)
+		end
+
+		private def close(e : Item)
+			@lw.flush unless @lw.empty?
+		end
+
+		private def open(e : LabeledParagraph)
+			unless @lw.empty?
+				@lw.flush
+				@pending_whitespace = "\n"
+			end
+			if @pending_whitespace.ends_with? "\n"
+				@io << @pending_whitespace
+				@whitespace_written = true
+			end
+			indent(e.indent)
+			dedent_label(e.label, align: Alignment::Left)
+		end
+
+		private def close(e : LabeledParagraph)
+			@lw.flush unless @lw.empty?
+			@pending_whitespace = "\n"
+			dedent
+		end
+
+		private def open(e)
+			# Default case: Do nothing
+		end
+
+		private def close(e)
+			# Default case: Do nothing
+		end
+	end
+
 	# Formats the given *text* for display in terminal.
 	def format(text : Markup, io : IO = STDOUT,
 			style : TerminalStyle = TerminalStyle::DEFAULT)
-		at_start = true
-		pending_whitespace = ""
-		bold = 0
-		italic = 0
-		dim = 0
-		numbering = Deque(Int32).new
-		in_ordered_list = false
-		indentation_level = 0
-
-		lw = LineWrapper.new(io, style.line_width, style.justify)
-		lw.left_skip = style.left_margin
-		lw.right_skip = style.right_margin
-
-		text.each do |e, start|
-			if start
-				# Entering element 'e'
-				whitespace_written = false
-				case e
-				when PlainText
-					next if e.text.empty?
-					at_start = false
-					c = Colorize.with
-					if bold > 0
-						c = c.bold
-					end
-					if dim > 0
-						c = c.dim
-					end
-					io << pending_whitespace
-					whitespace_written = true
-					c.surround(lw) do
-						lw << "\e[3m" if italic > 0
-						s = StringScanner.new(e.text)
-						until s.eos?
-							word = s.scan_until(/\s+/)
-							if !word
-								word = s.rest
-								s.terminate
-							end
-							trailing_spaces = s[0]?
-							if trailing_spaces
-								word = word[..-(trailing_spaces.size + 1)]
-								lw.write(Printable.new(word))
-								lw.write(Whitespace.new(trailing_spaces))
-							else
-								lw.write(Printable.new(word))
-							end
-						end
-						lw << "\e[0m" if italic > 0
-					end
-				when Bold
-					bold += 1
-				when Italic
-					italic += 1
-				when Small
-					dim += 1
-				when Paragraph
-					unless lw.empty?
-						lw.flush
-						pending_whitespace = "\n"
-					end
-					lw.next_left_skip = \
-							style.left_margin + style.paragraph_indent
-					next if e.text.empty?
-					if pending_whitespace.ends_with? "\n"
-						io << pending_whitespace
-						whitespace_written = true
-					elsif !at_start
-						io << "\n"
-					end
-				when OrderedList
-					unless lw.empty?
-						lw.flush
-					end
-					numbering.push 0
-					indentation_level += 1
-					lw.left_skip = style.left_margin +
-							style.list_indent * indentation_level
-				when Item
-					n = numbering.pop + 1
-					numbering.push n
-					indent = style.list_indent * indentation_level
-					io << " " * style.left_margin
-					case style.list_marker_alignment
-					in Alignment::Left
-						io << "#{n}. ".ljust(indent)
-					in Alignment::Center
-						io << "#{n}. ".center(indent)
-					in Alignment::Right
-						io << "#{n}. ".rjust(indent)
-					end
-					lw.next_left_skip = 0
-					lw.line_width = style.line_width -
-							(indent + style.left_margin + style.right_margin)
-				end
-				pending_whitespace = "" if whitespace_written
-			else
-				# Leaving element 'e'
-				case e
-				when Bold
-					bold -= 1
-				when Italic
-					italic -= 1
-				when Small
-					dim -= 1
-				when Paragraph
-					lw.flush unless lw.empty?
-					pending_whitespace = "\n" unless e.text.empty?
-				when OrderedList
-					lw.flush unless lw.empty?
-					numbering.pop unless numbering.empty?
-					indentation_level -= 1
-					lw.left_skip = style.left_margin +
-							style.list_indent * indentation_level
-				when Item
-					lw.flush unless lw.empty?
-				end
-			end
-		end
-		lw.flush unless lw.empty?
+		TerminalFormatter.new(style, io).format(text)
 	end
 
 	private struct Printable
@@ -231,18 +335,31 @@ module Diclionary::Text
 			@line_width = @width - (@next_left_skip + @right_skip)
 		end
 
-		def read(bytes : Bytes)
-			@io.read(bytes)
+		# Sets *count* characters of left skip to be ignored (not printed)
+		# when the next line is printed.
+		#
+		# This is like setting `next_left_skip`, but without automatically
+		# recalculating the line width.
+		def ignore_left_skip(count : Int32)
+			if @next_left_skip >= count
+				@next_left_skip = @next_left_skip - count
+			else
+				@next_left_skip = 0
+			end
 		end
 
-		def write(bytes : Bytes) : Nil
+		def read(slice : Bytes)
+			@io.read(slice)
+		end
+
+		def write(slice : Bytes) : Nil
 			if @line_width < 1
-				@io.write(bytes)
+				@io.write(slice)
 				return
 			end
 
 			word = String.build do |io|
-				io.write(bytes)
+				io.write(slice)
 			end
 			# For now, assume only control sequences
 			# are written with this method

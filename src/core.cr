@@ -21,11 +21,24 @@ module Diclionary
 
 	# A connector to a dictionary.
 	abstract struct Dictionary
+		# Unique machine name
+		getter id : String
+		# Pretty name
 		getter name : String
-		getter title : String
+		# Description
+		getter description : String?
+		# Author(s)
+		getter author : String?
+		# Year(s) of publication
+		getter year : String?
+		# Publisher (if applicable)
+		getter publisher : String?
+		# Website URL
+		getter url : String?
+
 		getter search_languages : Array(Language) = [] of Language
 
-		def initialize(@name = "", @title = "")
+		def initialize(@id = "", @name = "")
 		end
 
 		# Searches *word* in the dictionary and returns the results.
@@ -44,6 +57,31 @@ module Diclionary
 			client = HTTP::Client.new(host)
 			response = get_url(client, path)
 			client.close
+		end
+
+		def info() : Markup
+			m = markup
+			if desc = @description
+				m.children << paragraph(desc)
+			end
+			kw = {indent: 8}
+			if author = @author
+				m.children << labeled_paragraph("Author:", author, **kw)
+			end
+			publisher = @publisher
+			year = @year
+			if publisher || year
+				body = markup
+				body.children << markup(publisher) if publisher
+				body.children << markup(", ") if publisher && year
+				body.children << markup("#{year}")
+				par = LabeledParagraph.new("Published by:", body, **kw)
+				m.children << par
+			end
+			if url = @url
+				m.children << labeled_paragraph("URL:", url, **kw)
+			end
+			m
 		end
 	end
 

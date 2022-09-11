@@ -386,4 +386,26 @@ module Diclionary::Text
 	def item(*content : Markup | String)
 		Item.new(*content)
 	end
+
+	struct LabeledParagraph < Container
+		@@html_tag = "p"
+		property label : String
+		property indent : Int32
+
+		def initialize(@label, *content : Markup | String,
+				@indent = 4)
+			if content.size == 1
+				@value = [to_markup(content[0])] of Markup
+			else
+				@value = [] of Markup
+				content.each do |elem|
+					@value << to_markup(elem)
+				end
+			end
+		end
+	end
+
+	def labeled_paragraph(label : String, *content : Markup | String, **args)
+		LabeledParagraph.new(label, *content, **args)
+	end
 end

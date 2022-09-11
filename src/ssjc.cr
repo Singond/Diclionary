@@ -18,6 +18,10 @@ module Diclionary::Ujc
 
 		def initialize(*args)
 			super("ssjc", "Slovník spisovného jazyka českého")
+			@year = "1960–1971"
+			@author = "B. Havránek et al."
+			@publisher = "Ústav pro jazyk český"
+			@url = "http://ssjc.ujc.cas.cz"
 			@search_languages = [Language::Czech]
 		end
 
@@ -42,7 +46,7 @@ module Diclionary::Ujc
 			Log.debug {"Parsing #{nodeset.size} XML nodes as rich text entry"}
 			parents = Deque(Markup).new
 			par = Paragraph.new [] of Markup
-			root = markup(par)
+			root = Base.new(par)
 			parents.push(root)
 			parents.push(par)
 			node = nodeset[0]

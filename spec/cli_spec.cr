@@ -9,7 +9,7 @@ class Tty < String::Builder
 end
 
 Log.define_formatter Fmt, "#{message}"
-def run(args : Array(String), tty = true)
+def run(args : Array(String), tty = true, color = false)
 	stdout : IO
 	stderr : IO
 	if tty
@@ -23,11 +23,16 @@ def run(args : Array(String), tty = true)
 	Log.setup("*", :warn, log_backend)
 	exit_code = Diclionary::Cli.run(args, stdout, stderr)
 	Colorize.on_tty_only!  # Enable coloured test output
-	{stdout.to_s, stderr.to_s, exit_code}
+	out = stdout.to_s
+	err = stderr.to_s
+	unless color
+		out = out.gsub(/\e\[[0-9;]+m/, "")
+	end
+	{out, err, exit_code}
 end
 
-def run(*args : String, tty = true)
-	run(args.to_a, tty: tty)
+def run(*args : String, tty = true, color = false)
+	run(args.to_a, tty: tty, color: color)
 end
 
 describe "#run" do
@@ -62,11 +67,34 @@ describe "#run" do
 	context "--list-dictionaries" do
 		it "prints all installed dictionaries" do
 			o, e, c = run("--list-dictionaries")
-			o.lines.sort.join("\n").should eq <<-EXPECTED
-			neud: The New English Universal Dictionary
-			ted: Testford English Dictionary
-			zsjc: Zkušební slovník jazyka českého
+			lines = o.lines
+			idx = lines.index {|l| l =~ /The New English Universal Dictionary/}
+			idx.should_not be_nil
+			idx = idx.not_nil!
+			lines[idx,2].join("\n").should eq <<-EXPECTED
+			The New English Universal Dictionary
+			[neud]
 			EXPECTED
+
+			idx = lines.index {|l| l =~ /Testford English Dictionary/}
+			idx.should_not be_nil
+			idx = idx.not_nil!
+			lines[idx,3].join("\n").should eq <<-EXPECTED
+			Testford English Dictionary
+			[ted]
+			  The classical English dictionary
+			EXPECTED
+
+			idx = lines.index {|l| l =~ /Zkušební slovník jazyka českého/}
+			idx.should_not be_nil
+			idx = idx.not_nil!
+			lines[idx,2].join("\n").should eq <<-EXPECTED
+			Zkušební slovník jazyka českého
+			[zsjc]
+			EXPECTED
+
+			lines.first.should_not be_empty
+			lines.last.should_not be_empty
 		end
 	end
 
@@ -105,7 +133,6 @@ describe "#run" do
 		it "prints individual entries separated by a header" do
 			o, e, c = run("ten", "tea", "--nocolor")
 			o.should eq <<-EXPECTED + "\n"
-
 			Zkušební slovník jazyka českého
 
 			ten
@@ -158,7 +185,6 @@ describe "#run" do
 		it "searches the meaning of the English word 'ten'" do
 			o, e, c = run("ten", "--language=en", "--nocolor")
 			o.should eq <<-EXPECTED + "\n"
-
 			Testford English Dictionary
 
 			  the numeral 10
