@@ -18,6 +18,10 @@ module Diclionary::Ujc
 
 		def initialize(*args)
 			super("psjc", "Příruční slovník jazyka českého")
+			@year = "1935–1957"
+			@author = "Oldřich Hujer et al."
+			@publisher = "Ústav pro jazyk český"
+			@url = "http://psjc.ujc.cas.cz"
 			@search_languages = [Language::Czech]
 		end
 
