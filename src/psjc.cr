@@ -47,10 +47,22 @@ module Diclionary::Ujc
 			Log.debug {"Parsing #{nodeset.size} XML nodes as rich text entry"}
 			# parent = markup()
 			parents = Deque(Markup).new
-			parents.push(markup())
-			nodeset.each do |node|
+			par = Paragraph.new [] of Markup
+			root = Base.new(par)
+			parents.push(root)
+			parents.push(par)
+			node = nodeset[0]
+			loop do
 				cls = (node["class"]? || "").split
-				if cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
+				if cls.includes?("sep") && node.text.strip == "D"
+					until parents.last.is_a? Paragraph
+						parents.pop
+					end
+					parents.pop
+					par = Paragraph.new([] of Markup)
+					parents.last.children << par
+					parents.push par
+				elsif cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
 					if node.content.strip == "1."
 						list = OrderedList.new [] of Markup
 						parents.last.children << list
@@ -72,6 +84,7 @@ module Diclionary::Ujc
 					end
 					parents.last.children << elem
 				end
+				break unless node = node.next
 			end
 			TextEntry.new parents.first
 		end
