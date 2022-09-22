@@ -379,6 +379,18 @@ module Diclionary::Text
 		OrderedList.new(items.to_a.map{|i| i.as Markup})
 	end
 
+	struct UnorderedList < Container
+		@@html_tag = "ul"
+
+		def initialize(items : Array(Markup))
+			@value = items
+		end
+	end
+
+	def unordered_list(*items : Item)
+		UnorderedList.new(items.to_a.map{|i| i.as Markup})
+	end
+
 	struct Item < Container
 		@@html_tag = "li"
 	end

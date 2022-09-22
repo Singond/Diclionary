@@ -510,6 +510,27 @@ describe OrderedList do
 	# end
 end
 
+describe UnorderedList do
+	it "prints list items on new lines with indent" do
+		formatted = String.build {|io| format Lipsum[5], io, wrap_80}
+		formatted.should eq <<-EXPECTED
+			Donec sit amet facilisis lectus. Integer et fringilla velit. Sed aliquam eros ac
+			turpis tristique mollis. Maecenas luctus magna ac elit euismod fermentum.
+			  * Curabitur pulvinar purus imperdiet purus fringilla, venenatis facilisis quam
+			    efficitur. Nunc justo diam, interdum ut varius a, laoreet ut justo.
+			  * Sed rutrum pulvinar sapien eget feugiat.
+			  * Nulla vulputate mollis nisl eu venenatis. Vestibulum consectetur lorem
+			    augue, sed dictum arcu vulputate quis. Phasellus a velit velit. Morbi auctor
+			    ante sit amet justo molestie interdum. Fusce sed condimentum neque, nec
+			    aliquam magna. Maecenas et mollis risus, in facilisis nisl.
+			Proin elementum risus ut leo porttitor tristique. Sed sit amet tellus et velit
+			luctus laoreet quis sed urna. Sed dictum fringilla nibh sit amet tempor.
+
+			EXPECTED
+			#---------------------------------- 80 chars ----------------------------------#
+	end
+end
+
 describe Item do
 	it "produces an error if not in a list" do
 		m = markup(item("Item outside of a list"))
