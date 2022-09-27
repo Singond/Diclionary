@@ -7,6 +7,7 @@ Changelog
 - This changelog.
 - A new option `--list-dictionaries` which displays a list of all currently
   installed dictionaries.
+- Support for another Czech dictionary, _Příruční slovník jazyka českého_.
 
 ### Changed
 - Improved parsing of entries in `ssjc` containing multiple headwords.
