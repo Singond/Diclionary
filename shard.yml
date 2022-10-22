@@ -4,3 +4,10 @@ description: |
   A command-line interface for viewing selected online dictionaries.
 authors:
   - Jan Singon Slany <singond@seznam.cz>
+license: Apache-2.0
+repository: "https://github.com/Singond/Diclionary.git"
+
+crystal: ">= 1.0, < 2.0"
+targets:
+  dicl:
+    main: src/dicl.cr
