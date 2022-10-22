@@ -4,7 +4,7 @@ Upstream-Contact: Jan "Singon" Slany <singond@seznam.cz>
 Source: https://github.com/Singond/Diclionary
 
 Files: *
-Copyright: 2021 Jan "Singon" Slany
+Copyright: 2021-2022 Jan "Singon" Slany
 License: Apache-2.0
  On Debian systems, the full text of the Apache License version 2.0
  can be found in the file `/usr/share/common-licenses/Apache-2.0'.
