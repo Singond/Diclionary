@@ -105,7 +105,7 @@ module Diclionary::Cli
 			usage(stdout, parser)
 			return ExitCode::Success
 		in Mode::VERSION
-			stdout.puts VERSION
+			Diclionary.print_version(stdout)
 			return ExitCode::Success
 		end
 	end

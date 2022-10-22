@@ -51,7 +51,7 @@ describe "#run" do
 	context "--version" do
 		it "prints version and exits with succes code" do
 			output, err, exit_code = run("--version")
-			output.should eq "#{Diclionary::VERSION}\n"
+			output.should start_with "Diclionary #{Diclionary::VERSION} "
 			err.should be_empty
 			exit_code.should eq Diclionary::ExitCode::Success
 		end

@@ -8,6 +8,7 @@ module Diclionary
 	extend self
 
 	VERSION = {{ `shards version #{__DIR__}`.chomp.stringify }}
+	BUILD_DATE = {{ `date -u -I`.chomp.stringify }}
 
 	Log = ::Log.for("dicl")
 

@@ -93,6 +93,18 @@ module Diclionary
 		style
 	end
 
+	# Prints the version information into *io*.
+	#
+	# The information printed includes the program version and the date
+	# it was built.
+	def print_version(io = STDOUT)
+		io << "Diclionary "
+		io << VERSION
+		io << " ("
+		io << BUILD_DATE
+		io << ")\n"
+	end
+
 	private def print_dictionary_header(dict : Dictionary, io = STDOUT)
 		io << dict.name
 		if year = dict.year
