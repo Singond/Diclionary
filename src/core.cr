@@ -9,6 +9,7 @@ module Diclionary
 
 	VERSION = {{ `shards version #{__DIR__}`.chomp.stringify }}
 	BUILD_DATE = {{ `date -u -I`.chomp.stringify }}
+	REVISION = {{ env("DICL_GIT_COMMIT") }}
 
 	Log = ::Log.for("dicl")
 

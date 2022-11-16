@@ -97,12 +97,22 @@ module Diclionary
 	#
 	# The information printed includes the program version and the date
 	# it was built.
-	def print_version(io = STDOUT)
+	#
+	# If a configuration object is given and the log level is higher than
+	# `Notice`, it includes additional information like the corresponding
+	# Git commit hash (provided it was available at compile time).
+	def print_version(io = STDOUT, config = nil)
 		io << "Diclionary "
 		io << VERSION
 		io << " ("
 		io << BUILD_DATE
 		io << ")\n"
+		if (config && config.log_level <= ::Log::Severity::Info)
+			rev : String? = REVISION
+			if rev.is_a? String
+				io << "git revision: #{REVISION}\n" if !rev.empty?
+			end
+		end
 	end
 
 	private def print_dictionary_header(dict : Dictionary, io = STDOUT)
