@@ -33,3 +33,7 @@ uninstall:
 dist: $(distfile)
 $(distfile): $(all_files)
 	git archive --prefix $(distbase)/ -o $@ HEAD
+
+.PHONY: clean
+clean:
+	rm -f $(installables)
