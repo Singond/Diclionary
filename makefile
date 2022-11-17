@@ -3,13 +3,15 @@ all_files != git ls-files
 src_files != find src -type f
 installables = dicl
 version != grep "version:" shard.yml | cut -d " " -f2
+revision != git rev-parse HEAD 2> /dev/null
 distbase = diclionary-$(version)
 distfile = $(distbase).tar.gz
 
 all: $(installables)
 
 dicl: $(src_files)
-	crystal build --release src/dicl.cr
+	env DICL_GIT_COMMIT=$(revision) \
+		crystal build --release src/dicl.cr
 
 .PHONY: check
 check: $(src_files)
