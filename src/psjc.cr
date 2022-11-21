@@ -45,23 +45,30 @@ module Diclionary::Ujc
 
 		def parse_entry_rich(nodeset : XML::NodeSet) : TextEntry
 			Log.debug {"Parsing #{nodeset.size} XML nodes as rich text entry"}
-			# parent = markup()
 			parents = Deque(Markup).new
 			par = Paragraph.new [] of Markup
 			root = Base.new(par)
 			parents.push(root)
 			parents.push(par)
 			node = nodeset[0]
+			sense_list : UnorderedList? = nil
 			loop do
 				cls = (node["class"]? || "").split
 				if cls.includes?("sep") && node.text.strip == "D"
-					until parents.last.is_a? Paragraph
-						parents.pop
+					# This marks the start of another sense.
+					# Ensure a parent list is available and start an item.
+					if !sense_list
+						sense_list = UnorderedList.new [] of Markup
+						parents.last.children << sense_list
+						parents.push sense_list
+					else
+						until parents.last == sense_list
+							parents.pop
+						end
 					end
-					parents.pop
-					par = Paragraph.new([] of Markup)
-					parents.last.children << par
-					parents.push par
+					item = Item.new([] of Markup)
+					sense_list.children << item
+					parents.push item
 				elsif cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
 					if node.content.strip == "1."
 						list = OrderedList.new [] of Markup
