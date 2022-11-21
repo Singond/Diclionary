@@ -5,3 +5,5 @@ SSJC
 ----
 - jeviti
 - den
+- strana: A dash inside the text is interpreted a the start of
+  another headword.
