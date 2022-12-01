@@ -1,8 +1,8 @@
-require "./core.cr"
-require "./term.cr"
+require "./core"
+require "./term"
 
-require "./psjc.cr"
-require "./ssjc.cr"
+require "./psjc"
+require "./ssjc"
 
 module Diclionary
 

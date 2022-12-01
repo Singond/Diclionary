@@ -1,4 +1,4 @@
-require "../src/markup.cr"
+require "../src/markup"
 
 include Diclionary::Text
 

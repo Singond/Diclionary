@@ -2,7 +2,7 @@ require "colorize"
 require "http/client"
 require "log"
 
-require "./markup.cr"
+require "./markup"
 
 module Diclionary
 	extend self

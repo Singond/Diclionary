@@ -1,5 +1,5 @@
 require "string_scanner"
-require "./markup.cr"
+require "./markup"
 
 module Diclionary::Text
 	extend self

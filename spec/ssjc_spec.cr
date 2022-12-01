@@ -1,8 +1,8 @@
 require "spec"
 
-require "../src/markup.cr"
-require "../src/ssjc.cr"
-require "../src/term.cr"
+require "../src/markup"
+require "../src/ssjc"
+require "../src/term"
 
 include Diclionary
 include Diclionary::Text

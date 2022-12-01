@@ -1,4 +1,4 @@
-require "./core.cr"
+require "./core"
 
 # Helper module to interact with the online dictionaries provided
 # by the Czech Language Institute (UJC).

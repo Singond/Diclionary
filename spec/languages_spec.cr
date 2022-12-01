@@ -1,6 +1,6 @@
 require "spec"
 
-require "../src/languages.cr"
+require "../src/languages"
 
 include Diclionary
 

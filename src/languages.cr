@@ -1,4 +1,4 @@
-require "./core.cr"
+require "./core"
 
 module Diclionary
 	struct Language

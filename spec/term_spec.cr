@@ -1,8 +1,8 @@
 require "spec"
 
-require "../src/markup.cr"
-require "../src/term.cr"
-require "./lipsum.cr"
+require "../src/markup"
+require "../src/term"
+require "./lipsum"
 
 include Diclionary
 include Diclionary::Text

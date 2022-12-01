@@ -1,6 +1,6 @@
 require "option_parser"
 
-require "./main.cr"
+require "./main"
 
 module Diclionary::Cli
 	extend self

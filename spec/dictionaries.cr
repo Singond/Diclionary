@@ -1,5 +1,5 @@
-require "../src/languages.cr"
-require "./lipsum.cr"
+require "../src/languages"
+require "./lipsum"
 
 include Diclionary
 

@@ -1,6 +1,6 @@
 require "spec"
 
-require "../src/markup.cr"
+require "../src/markup"
 
 include Diclionary::Text
 

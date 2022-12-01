@@ -1,4 +1,4 @@
-require "./cli.cr"
+require "./cli"
 
 # Setup logging
 Log.define_formatter Fmt, "#{source}: #{message}"

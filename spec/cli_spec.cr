@@ -1,6 +1,6 @@
-require "../src/cli.cr"
-require "./dictionaries.cr"
-require "./spec_helper.cr"
+require "../src/cli"
+require "./dictionaries"
+require "./spec_helper"
 
 class Tty < String::Builder
 	def tty?
