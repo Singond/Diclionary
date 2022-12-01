@@ -1,8 +1,8 @@
 require "./core"
 require "./term"
 
-require "./psjc"
-require "./ssjc"
+require "./dictionaries/psjc"
+require "./dictionaries/ssjc"
 
 module Diclionary
 

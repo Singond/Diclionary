@@ -1,8 +1,8 @@
 require "spec"
 
-require "../src/markup"
-require "../src/psjc"
-require "../src/term"
+require "../../src/markup"
+require "../../src/term"
+require "../../src/dictionaries/psjc"
 
 include Diclionary
 include Diclionary::Text

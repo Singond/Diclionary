@@ -2,8 +2,8 @@ require "http/client"
 require "uri"
 require "xml"
 
-require "./core"
-require "./languages"
+require "../core"
+require "../languages"
 require "./ujc"
 
 include Diclionary::Text

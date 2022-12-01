@@ -1,8 +1,8 @@
 require "spec"
 
-require "../src/markup"
-require "../src/ssjc"
-require "../src/term"
+require "../../src/markup"
+require "../../src/term"
+require "../../src/dictionaries/ssjc"
 
 include Diclionary
 include Diclionary::Text
@@ -29,6 +29,7 @@ def printed(entry : TextEntry) : String
 end
 
 def parse_file(filename, format : Format) : Array(Entry)
+	filename = "spec/dictionaries/data/" + filename
 	raw = File.read(filename)
 	html = XML.parse_html(raw)
 	SSJC.parse_response(html, format)
@@ -41,11 +42,11 @@ end
 
 describe SsjcDictionary do
 	it "produces markup whose root is not a Paragraph" do
-		entry = parse_file_rich("spec/ssjc_longlist.html")[0]
+		entry = parse_file_rich("ssjc_longlist.html")[0]
 		entry.text.should_not be_a Paragraph
 	end
 	it "parses '11.' as the eleventh item in a list, not first" do
-		entry = parse_file_rich("spec/ssjc_longlist.html")[0]
+		entry = parse_file_rich("ssjc_longlist.html")[0]
 		ol = entry.text[0][0]
 		ol.should be_a OrderedList
 		ol.size.should eq 11
