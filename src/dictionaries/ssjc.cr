@@ -53,7 +53,7 @@ module Diclionary::Ujc
 			loop do
 				cls = (node["class"]? || "").split
 				if cls.includes?("delim") && /\s*[0-9]+\./ =~ node.content
-					item_prefix: String?
+					item_prefix : String?
 					# If the delimiter looks like a first item, start a new list.
 					if match = node.content.strip.match FIRST_ITEM_REGEX
 						# If the item has a non-numeric prefix,
