@@ -21,12 +21,13 @@ describe Diclionary do
 			end
 
 			it "shows an error message and returns an error" do
+				terms = ["anything"]
 				config = Config.new
-				config.terms = ["anything"]
 				ch = Channel({ExitCode, String}?).new
 				spawn do
 					stderr = String::Builder.new
-					c = Diclionary.run(config, stderr: stderr)
+					config.stderr = stderr
+					c = Diclionary.run_once(terms, config)
 					ch.send({c, stderr.to_s})
 				end
 				spawn do

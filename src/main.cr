@@ -1,6 +1,7 @@
 require "./core"
 require "./term"
 
+require "./dictionaries/dict"
 require "./dictionaries/psjc"
 require "./dictionaries/ssjc"
 
@@ -200,11 +201,49 @@ module Diclionary
 		did_print
 	end
 
-	def run(config : Config, stdout = STDOUT, stderr = STDERR) : ExitCode
+	# Searches given *terms* in given *dictionaries*.
+	def search_terms(terms : Array(String), dictionaries : Array(Dictionary),
+			config : Config)
+		results = Array(SearchResult).new
+		channel = Channel(Nil).new
+		fibers = 0
+		dictionaries.each do |d|
+			terms.each do |word|
+				fibers += 1
+				spawn do
+					begin
+						Log.debug {"Searching for '#{word}'."}
+						results.concat d.search(word, config.format)
+						channel.send(nil)
+					rescue ex
+						config.stderr.puts ex.message
+						channel.send(nil)
+					end
+				end
+			end
+		end
+		fibers.times do
+			channel.receive
+		end
+		results
+	end
+
+	# Searches given *terms* in given *dictionaries* and prints
+	# the results into STDOUT.
+	def search_print_terms(
+			terms : Array(String), dictionaries : Array(Dictionary),
+			config : Config)
+		results = search_terms(terms, dictionaries, config)
+		print_results(results, config, config.stdout,
+				print_term: terms.size > 1,
+				print_dict: dictionaries.size > 1)
+	end
+
+	def run_once(terms : Array(String), config : Config) : ExitCode
 		Log.level = config.log_level
 
 		# Handled separately in CLI, kept here for non-CLI usage
-		if config.terms.empty?
+		if terms.empty?
 			Log.error {"No word given"}
 			return ExitCode::BadUsage
 		end
@@ -215,33 +254,15 @@ module Diclionary
 			return ExitCode::BadConfig
 		end
 
-		results = Array(SearchResult).new
-		channel = Channel(Nil).new
-		fibers = 0
-		dictionaries.each do |d|
-			config.terms.each do |word|
-				fibers += 1
-				spawn do
-					begin
-						Log.debug {"Searching for '#{word}'."}
-						results.concat d.search(word, config.format)
-						channel.send(nil)
-					rescue ex
-						stderr.puts ex.message
-						channel.send(nil)
-					end
-				end
-			end
+		did_print = search_print_terms(terms, dictionaries, config)
+		if did_print
+			ExitCode::Success
+		else
+			ExitCode::NoResult
 		end
-		fibers.times do
-			channel.receive
-		end
-		unless print_results(results, config, stdout,
-				print_term: config.terms.size > 1,
-				print_dict: dictionaries.size > 1)
-			# No results found
-			return ExitCode::NoResult
-		end
+	end
+
+	def run_interactive(config : Config) : ExitCode
 		ExitCode::Success
 	end
 end

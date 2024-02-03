@@ -206,7 +206,8 @@ module Diclionary
 
 	struct Config
 		property log_level : ::Log::Severity = ::Log::Severity::Notice
-		property terms = [] of String
+		property stdout : IO = STDOUT
+		property stderr : IO = STDERR
 		property format : Format = Format::RichText
 		property color : Bool = true
 		property dictionaries = [] of String

@@ -14,16 +14,18 @@ module Diclionary::Cli
 
 	private enum Mode
 		RUN
+		INTERACTIVE
 		LIST_DICTIONARIES
 		VERSION
 		HELP
 	end
 
-	private def parse_args(args, stdout = STDOUT, stderr = STDERR) \
-			: {Mode, Config, OptionParser}
+	private def parse_args(args) \
+			: {Mode, Array(String), Config, OptionParser}
 		Log.debug {"Parsing args"}
 		config = Config.new
-		mode = nil
+		terms = [] of String
+		mode = Mode::RUN
 		exit_code = nil
 		parser = OptionParser.new do |p|
 			p.banner = <<-BANNER
@@ -76,16 +78,21 @@ module Diclionary::Cli
 		end
 		parser.unknown_args do |args|
 			if args.size > 0
-				config.terms = args
+				terms = args
+				mode = Mode::RUN
+			else
+				mode = Mode::INTERACTIVE
 			end
 		end
 		parser.parse args
-		return {(m = mode) ? m : Mode::RUN, config, parser}
+		return {mode, terms, config, parser}
 	end
 
 	def run(args = ARGV, stdout = STDOUT, stderr = STDERR) : ExitCode
 		begin
-			mode, config, parser = parse_args(args, stdout, stderr)
+			mode, terms, config, parser = parse_args(args)
+			config.stdout = stdout
+			config.stderr = stderr
 		rescue e : OptionParser::Exception
 			stderr.puts e.message
 			return ExitCode::BadUsage
@@ -93,11 +100,9 @@ module Diclionary::Cli
 
 		case mode
 		in Mode::RUN
-			if config.terms.empty?
-				usage(stderr, parser)
-				return ExitCode::BadUsage
-			end
-			Diclionary.run(config, stdout: stdout, stderr: stderr)
+			Diclionary.run_once(terms, config)
+		in Mode::INTERACTIVE
+			Diclionary.run_interactive(config)
 		in Mode::LIST_DICTIONARIES
 			Diclionary.list_dictionaries stdout, config
 			return ExitCode::Success
