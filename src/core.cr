@@ -212,5 +212,6 @@ module Diclionary
 		property color : Bool = true
 		property dictionaries = [] of String
 		property search_lang : Language?
+		property command_prefix = ":"
 	end
 end

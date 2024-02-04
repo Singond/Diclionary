@@ -263,14 +263,7 @@ module Diclionary
 		end
 	end
 
-	private def print_greeting(config : Config, stdout = STDOUT)
-		# TODO: Include more information and tips
-		Diclionary.print_version(stdout, config)
-	end
-
 	def run_interactive(config : Config) : ExitCode
-		print_greeting(config)
-
 		dictionaries = select_dictionaries(config)
 		if dictionaries.size == 0
 			Log.error {"No dictionaries match the search criteria."}
