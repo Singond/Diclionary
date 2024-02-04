@@ -12,21 +12,14 @@ module Diclionary::Cli
 		io << "\n"
 	end
 
-	private enum Mode
-		RUN
-		INTERACTIVE
-		LIST_DICTIONARIES
-		VERSION
-		HELP
-	end
-
-	private def parse_args(args) \
-			: {Mode, Array(String), Config, OptionParser}
-		Log.debug {"Parsing args"}
+	private def parse_args(args, stdout = STDOUT, stderr = STDERR) \
+			: {Array(String) | ExitCode, Config}
+		Log.debug {"Parsing arguments..."}
 		config = Config.new
-		terms = [] of String
-		mode = nil
+		config.stdout = stdout
+		config.stderr = stderr
 		exit_code = nil
+		after = nil
 		parser = OptionParser.new do |p|
 			p.banner = <<-BANNER
 			Usage: dicl [OPTIONS] WORD...
@@ -34,11 +27,14 @@ module Diclionary::Cli
 			Options:
 			BANNER
 			p.on "--version", "Show version number and exit" do
-				mode = Mode::VERSION unless mode
+				after = -> {
+					Diclionary.print_version(stdout, config)
+				}
+				exit_code = ExitCode::Success
 			end
 			p.on "-h", "--help", "Print usage and exit" do
-				mode = Mode::HELP unless mode
-				p.stop
+				usage(stdout, p)
+				exit_code = ExitCode::Success
 			end
 			p.on "-v", "--verbose", "Increase verbosity" do
 				# Decrease logging level, if possible.
@@ -74,30 +70,18 @@ module Diclionary::Cli
 				end
 			end
 			p.on "--list-dictionaries", "List installed dictionaries" do
-				mode = Mode::LIST_DICTIONARIES unless mode
-			end
-		end
-		# Set the default mode if no option requires any other mode.
-		# While not explicitly stated in documentation, `unknown_args`
-		# is processed after all options (`on` blocks), so it can be
-		# done here.
-		parser.unknown_args do |args|
-			if args.size > 0
-				terms = args
-				mode = Mode::RUN unless mode
-			else
-				mode = Mode::INTERACTIVE unless mode
+				Diclionary.list_dictionaries stdout, config
+				exit_code = ExitCode::Success
 			end
 		end
 		parser.parse args
-		# Mode should never be nil at this point,
-		# but the compiler does not know.
-		return {mode.not_nil!, terms, config, parser}
+		after.try &.call
+		return exit_code || args || [] of String, config
 	end
 
 	def run(args = ARGV, stdout = STDOUT, stderr = STDERR) : ExitCode
 		begin
-			mode, terms, config, parser = parse_args(args)
+			terms, config = parse_args(args, stdout, stderr)
 			config.stdout = stdout
 			config.stderr = stderr
 		rescue e : OptionParser::Exception
@@ -105,20 +89,13 @@ module Diclionary::Cli
 			return ExitCode::BadUsage
 		end
 
-		case mode
-		in Mode::RUN
+		if terms.is_a? ExitCode
+			terms
+		elsif args.size > 0
 			Diclionary.run_once(terms, config)
-		in Mode::INTERACTIVE
+		else
 			Diclionary.run_interactive(config)
-		in Mode::LIST_DICTIONARIES
-			Diclionary.list_dictionaries stdout, config
-			return ExitCode::Success
-		in Mode::HELP
-			usage(stdout, parser)
-			return ExitCode::Success
-		in Mode::VERSION
-			Diclionary.print_version(stdout, config)
-			return ExitCode::Success
+			ExitCode::Success
 		end
 	end
 end
