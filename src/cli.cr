@@ -25,7 +25,7 @@ module Diclionary::Cli
 		Log.debug {"Parsing args"}
 		config = Config.new
 		terms = [] of String
-		mode = Mode::RUN
+		mode = nil
 		exit_code = nil
 		parser = OptionParser.new do |p|
 			p.banner = <<-BANNER
@@ -38,6 +38,7 @@ module Diclionary::Cli
 			end
 			p.on "-h", "--help", "Print usage and exit" do
 				mode = Mode::HELP unless mode
+				p.stop
 			end
 			p.on "-v", "--verbose", "Increase verbosity" do
 				# Decrease logging level, if possible.
@@ -76,16 +77,22 @@ module Diclionary::Cli
 				mode = Mode::LIST_DICTIONARIES unless mode
 			end
 		end
+		# Set the default mode if no option requires any other mode.
+		# While not explicitly stated in documentation, `unknown_args`
+		# is processed after all options (`on` blocks), so it can be
+		# done here.
 		parser.unknown_args do |args|
 			if args.size > 0
 				terms = args
-				mode = Mode::RUN
+				mode = Mode::RUN unless mode
 			else
-				mode = Mode::INTERACTIVE
+				mode = Mode::INTERACTIVE unless mode
 			end
 		end
 		parser.parse args
-		return {mode, terms, config, parser}
+		# Mode should never be nil at this point,
+		# but the compiler does not know.
+		return {mode.not_nil!, terms, config, parser}
 	end
 
 	def run(args = ARGV, stdout = STDOUT, stderr = STDERR) : ExitCode

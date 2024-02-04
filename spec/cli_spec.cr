@@ -41,11 +41,8 @@ describe "#run" do
 	end
 
 	context "without arguments" do
-		it "fails and prints error" do
-			output, err, exit_code = run([] of String)
-			output.should be_empty
-			err.should_not be_empty
-			exit_code.should eq Diclionary::ExitCode::BadUsage
+		pending "starts interactive mode" do
+			# TODO: Add test
 		end
 	end
 	context "--version" do
