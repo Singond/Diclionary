@@ -17,7 +17,7 @@ class Diclionary::Repl
 	end
 
 	private def process_line(line)
-		if line == ".exit" || line == ".exit"
+		if line.in?(":q", ":quit", ":exit")
 			return true
 		end
 		return unless line
